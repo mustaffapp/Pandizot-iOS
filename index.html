@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+    <title>3S Sound</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+        :root { --theme: #007aff; --bg: #f2f2f7; --card: #ffffff; --text: #000000; --sub: #8e8e93; --dot: #ff3b30; }
+        [data-mode="dark"] { --bg: #000000; --card: #1c1c1e; --text: #ffffff; --sub: #8e8e93; }
+
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, system-ui, sans-serif; transition: 0.3s; padding-bottom: 50px; }
+        
+        .header-area { padding: 60px 20px 10px; }
+        h1 { font-size: 34px; font-weight: 800; margin: 0; letter-spacing: -0.5px; }
+        .status-line { display: flex; align-items: center; font-size: 15px; color: var(--sub); margin-top: 5px; text-align: left; }
+        .dot { width: 8px; height: 8px; background: var(--dot); border-radius: 50%; margin-right: 6px; }
+        .connected .dot { background: #34c759; }
+        .connected .status-text { color: #34c759; font-weight: 600; }
+
+        .widget-menu { position: fixed; top: 60px; right: 20px; width: 44px; height: 44px; background: var(--card); border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000; font-size: 20px; cursor: pointer; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .box { background: var(--card); border-radius: 20px; padding: 15px; aspect-ratio: 1/1; display: flex; flex-direction: column; justify-content: space-between; border: 2.5px solid transparent; transition: 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .box.active { border-color: var(--theme); }
+        
+        .box-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        .icon { font-size: 18px; width: 32px; height: 32px; background: var(--bg); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+        
+        .switch { position: relative; display: inline-block; width: 42px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--theme); }
+        input:checked + .slider:before { transform: translateX(18px); }
+
+        .label { font-weight: 600; font-size: 16px; }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 2000; padding: 40px 0; overflow-y: auto; }
+        .modal.active { display: block; }
+        .close-btn { position: absolute; top: 45px; right: 20px; font-weight: 600; color: var(--theme); font-size: 17px; cursor: pointer; }
+
+        .list-group { background: var(--card); border-radius: 12px; overflow: hidden; margin: 15px 20px; }
+        .list-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 0.5px solid rgba(142,142,147,0.2); }
+        select, input[type="text"] { background: none; border: none; color: var(--sub); font-size: 16px; outline: none; text-align: right; width: 50%; }
+    </style>
+</head>
+<body>
+
+    <div class="widget-menu" onclick="toggleModal('settingsModal')">⚙️</div>
+
+    <div id="home">
+        <div class="header-area">
+            <h1>3S Sound</h1>
+            <div id="status-container" class="status-line">
+                <div class="dot"></div>
+                <span class="status-text">Bağlı Değil</span>
+            </div>
+        </div>
+        <div class="grid" id="main-grid"></div>
+    </div>
+
+    <div id="settingsModal" class="modal">
+        <div class="close-btn" onclick="toggleModal('settingsModal')">Bitti</div>
+        <h1 style="margin-left: 20px;">Ayarlar</h1>
+        
+        <div class="list-group">
+            <div class="list-row" onclick="manualConnect()" style="color:var(--theme); font-weight: 600; cursor:pointer;">
+                <span>Cihaz Tara ve Bağlan</span>
+            </div>
+            <div class="list-row">
+                <span>Görünüm</span>
+                <select id="modeSelect" onchange="updateMode(this.value)">
+                    <option value="light">Açık</option>
+                    <option value="dark">Koyu</option>
+                    <option value="system">Sistem</option>
+                </select>
+            </div>
+            <div class="list-row">
+                <span>Tema Rengi</span>
+                <input type="color" id="themeInput" onchange="updateTheme(this.value)">
+            </div>
+        </div>
+
+        <div id="config-editor"></div>
+    </div>
+
+    <script>
+        const SERVICE = "0000ffe0-0000-1000-8000-00805f9b34fb";
+        const CHAR = "0000ffe1-0000-1000-8000-00805f9b34fb";
+        let characteristic;
+
+        let config = JSON.parse(localStorage.getItem('3s_cfg')) || [
+            {id: 0, name: "Bas", on: "B1", off: "B0", state: false, icon: "🔊"},
+            {id: 1, name: "Tiz", on: "T1", off: "T0", state: false, icon: "🎼"},
+            {id: 2, name: "Sub", on: "S1", off: "S0", state: false, icon: "🎸"}
+        ];
+
+        function updateMode(mode) {
+            localStorage.setItem('3s_mode', mode);
+            if(mode === 'system') {
+                const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.body.setAttribute('data-mode', isDark ? 'dark' : 'light');
+            } else {
+                document.body.setAttribute('data-mode', mode);
+            }
+        }
+
+        function updateTheme(color) {
+            document.documentElement.style.setProperty('--theme', color);
+            localStorage.setItem('3s_theme', color);
+        }
+
+        function toggleModal(id) {
+            document.getElementById(id).classList.toggle('active');
+        }
+
+        function render() {
+            const grid = document.getElementById('main-grid');
+            grid.innerHTML = config.map(s => `
+                <div class="box ${s.state ? 'active' : ''}">
+                    <div class="box-top">
+                        <div class="icon">${s.icon}</div>
+                        <label class="switch">
+                            <input type="checkbox" ${s.state ? 'checked' : ''} onchange="toggleDevice(${s.id})">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="label">${s.name}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('config-editor').innerHTML = config.map((s, i) => `
+                <div class="section-title" style="margin: 20px 20px 5px; font-size:13px; color:gray; text-transform: uppercase;">Sviç ${i+1}</div>
+                <div class="list-group">
+                    <div class="list-row"><span>İsim</span><input type="text" value="${s.name}" onchange="save(${i},'name',this.value)"></div>
+                    <div class="list-row"><span>Açık Komut</span><input type="text" value="${s.on}" onchange="save(${i},'on',this.value)"></div>
+                </div>
+            `).join('');
+        }
+
+        function save(i, k, v) { 
+            config[i][k] = v; 
+            localStorage.setItem('3s_cfg', JSON.stringify(config)); 
+            render(); 
+        }
+
+        async function toggleDevice(id) {
+            config[id].state = !config[id].state;
+            const cmd = config[id].state ? config[id].on : config[id].off;
+            if(characteristic) {
+                try {
+                    await characteristic.writeValue(new TextEncoder().encode(cmd));
+                } catch(e) { console.log("Gönderim hatası"); }
+            }
+            localStorage.setItem('3s_cfg', JSON.stringify(config));
+            render();
+        }
+
+        async function manualConnect() {
+            try {
+                const device = await navigator.bluetooth.requestDevice({ filters: [{ services: [SERVICE] }] });
+                const server = await device.gatt.connect();
+                const service = await server.getPrimaryService(SERVICE);
+                characteristic = await service.getCharacteristic(CHAR);
+                document.getElementById('status-container').classList.add('connected');
+                document.querySelector('.status-text').innerText = "Bağlı";
+            } catch(e) { console.log("Bağlanılamadı"); }
+        }
+
+        // Init
+        const savedMode = localStorage.getItem('3s_mode') || 'system';
+        document.getElementById('modeSelect').value = savedMode;
+        updateMode(savedMode);
+        
+        const savedTheme = localStorage.getItem('3s_theme') || '#007aff';
+        document.getElementById('themeInput').value = savedTheme;
+        updateTheme(savedTheme);
+        
+        render();
+    </script>
+</body>
+</html>
