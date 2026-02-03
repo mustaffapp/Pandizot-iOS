@@ -5,89 +5,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
     <title>3S Sound Pro</title>
     <style>
-        :root { --theme: #34c759; --bg: #f2f2f7; --card: #ffffff; --text: #000000; --sub: #8e8e93; --border: #d1d1d6; }
+        /* Default theme is now Blue (#007aff) */
+        :root { --theme: #007aff; --bg: #f2f2f7; --card: #ffffff; --text: #000000; --sub: #8e8e93; --border: #d1d1d6; }
         [data-mode="dark"] { --bg: #000000; --card: #1c1c1e; --text: #ffffff; --sub: #98989d; --border: #333333; }
         
         body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; transition: 0.3s; -webkit-tap-highlight-color: transparent; }
         
-        /* Layout */
+        /* Layout & Header */
         .page { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 1000; overflow-y: auto; }
         .page.active { display: block; }
-        
-        /* Header */
         .header { padding: 60px 24px 20px; position: relative; display: flex; flex-direction: column; justify-content: center; }
         h1 { font-size: 34px; font-weight: 800; margin: 0; letter-spacing: -0.5px; }
-        
-        /* Top Right Icons (Black/White) */
         .top-actions { position: absolute; top: 60px; right: 24px; display: flex; flex-direction: column; gap: 12px; }
         .action-btn { width: 48px; height: 48px; background: var(--card); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; color: var(--text); border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-
-        /* Status Pill */
         .status-container { margin-top: 15px; display: flex; }
         .status-pill { display: inline-flex; align-items: center; background: var(--card); color: var(--sub); padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid var(--border); transition: 0.3s; }
         .status-pill.connected { color: var(--theme); border-color: var(--theme); background: rgba(var(--theme), 0.1); }
         .status-pill::before { content: "●"; margin-right: 8px; font-size: 8px; }
 
-        /* Dashboard Grid */
+        /* Dashboard Grid & Boxes matching the image layout */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 24px; }
         .box { 
             background: var(--card); border-radius: 28px; padding: 24px; 
-            aspect-ratio: 1 / 1.1; /* Symmetrical Vertical Box */
+            aspect-ratio: 1 / 1.1; 
             display: flex; flex-direction: column; justify-content: space-between; 
             border: 2px solid transparent; transition: 0.2s; cursor: pointer; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-            position: relative; overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03); position: relative; overflow: hidden;
         }
         .box.active { border-color: var(--theme); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
         
-        /* Icons & Switch */
         .box-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        /* Icon wrapper style matching image */
         .icon-wrapper { 
             width: 54px; height: 54px; border-radius: 16px; 
             display: flex; align-items: center; justify-content: center; 
-            background: var(--bg); font-size: 26px; transition: 0.3s;
+            background: var(--bg); color: var(--text); transition: 0.3s;
         }
-        .box.active .icon-wrapper { background: var(--theme); color: white; transform: scale(1.05); }
+        .box.active .icon-wrapper { background: var(--theme); color: white; }
+        .icon-wrapper svg { width: 28px; height: 28px; }
 
+        /* Switch style matching image */
         .switch { width: 50px; height: 30px; background: #e5e5ea; border-radius: 15px; position: relative; transition: 0.3s; }
         [data-mode="dark"] .switch { background: #3a3a3c; }
         .switch::after { content: ""; position: absolute; width: 26px; height: 26px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         .box.active .switch { background: var(--theme); }
         .box.active .switch::after { left: 22px; }
 
-        /* Box Content */
         .box-info { display: flex; flex-direction: column; gap: 4px; }
         .box-title { font-weight: 700; font-size: 19px; letter-spacing: -0.5px; }
-        .box-status { font-size: 12px; color: var(--sub); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        /* Status text made smaller and updated language */
+        .box-status { font-size: 11px; color: var(--sub); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
         .box.active .box-status { color: var(--theme); }
 
-        /* Pages & Settings */
+        /* Settings & Bluetooth Pages */
         .page-header { padding: 24px; display: flex; justify-content: space-between; align-items: center; background: var(--bg); position: sticky; top: 0; z-index: 10; border-bottom: 0.5px solid var(--border); backdrop-filter: blur(10px); }
         .header-btn { color: var(--theme); font-size: 17px; cursor: pointer; text-decoration: none; display: flex; align-items: center; font-weight: 500; }
         .header-title { font-weight: 700; font-size: 17px; }
-        
         .settings-group { margin: 24px; }
         .group-label { color: var(--sub); font-size: 12px; margin-bottom: 10px; margin-left: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
         .settings-card { background: var(--card); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; }
         .settings-row { display: flex; padding: 18px; border-bottom: 1px solid var(--border); justify-content: space-between; align-items: center; }
         .settings-row:last-child { border-bottom: none; }
-        
         .val-grid { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--border); background: rgba(120,120,120,0.03); }
         .val-cell { padding: 14px 18px; border-right: 1px solid var(--border); }
         .val-cell:last-child { border-right: none; }
         .val-label { font-size: 10px; color: var(--sub); font-weight: 700; margin-bottom: 6px; letter-spacing: 0.5px; }
-        
-        input { background: none; border: none; color: var(--text); font-size: 17px; width: 100%; outline: none; font-family: inherit; }
-        
-        /* Specifics */
-        .color-palette { display: flex; gap: 10px; }
+        input { background: none; border: none; color: var(--text); font-size: 17px; width: 100%; outline: none; font-family: inherit; text-align: right; }
+        .color-palette { display: flex; gap: 10px; flex-wrap: wrap; }
         .color-dot { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .color-dot.selected { border-color: var(--text); transform: scale(1.15); }
-        
         .scan-area { padding: 60px 20px; text-align: center; }
         .loader { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--theme); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        
         .main-btn { position: fixed; bottom: 40px; left: 24px; right: 24px; background: var(--text); color: var(--bg); padding: 18px; border-radius: 18px; font-weight: 700; text-align: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
     </style>
 </head>
@@ -118,16 +107,16 @@
             <div class="group-label">Appearance</div>
             <div class="settings-card">
                 <div class="settings-row">
-                    <span>Appearance</span>
+                    <span>Mode</span>
                     <select id="modeSelect" onchange="applyMode(this.value)" style="background:none; border:none; color:var(--sub); font-size:16px; outline:none; text-align:right;">
                         <option value="light">Light</option>
                         <option value="dark">Dark</option>
                         <option value="system">System</option>
                     </select>
                 </div>
-                <div class="settings-row">
+                <div class="settings-row" style="align-items: flex-start;">
                     <span>Theme</span>
-                    <div class="color-palette" id="themePalette"></div>
+                    <div class="color-palette" id="themePalette" style="max-width: 60%; justify-content: flex-end;"></div>
                 </div>
             </div>
         </div>
@@ -137,14 +126,13 @@
         <div class="page-header">
             <span class="header-btn" onclick="openPage('dashboard')">‹ Dashboard</span>
             <span class="header-title">Bluetooth</span>
-            <span style="width: 80px;"></span> </div>
-        
+            <span style="width: 80px;"></span>
+        </div>
         <div class="scan-area">
             <div class="loader"></div>
             <div style="font-weight:700; font-size:18px; margin-bottom:5px;">Scanning</div>
             <div style="color:var(--sub); font-size:14px;">Looking for BLE devices...</div>
         </div>
-
         <div class="settings-group">
             <div class="group-label">Connected Device</div>
             <div class="settings-card">
@@ -154,7 +142,6 @@
                 </div>
             </div>
         </div>
-
         <div class="main-btn" onclick="connect()">Connect Device</div>
     </div>
 
@@ -163,11 +150,17 @@
         const CHAR = "0000ffe1-0000-1000-8000-00805f9b34fb";
         let bleChar;
 
-        const colors = ["#34c759", "#007aff", "#ff3b30", "#af52de", "#ff9500", "#5856d6"];
-        let config = JSON.parse(localStorage.getItem('3s_v5')) || [
-            {id:0, name:"Pandizot", on:"1", off:"1", state:false, icon:"🔊"},
-            {id:1, name:"LED Strip", on:"3", off:"4", state:false, icon:"💡"},
-            {id:2, name:"System", on:"5", off:"6", state:false, icon:"⚡"}
+        // Common IO/Binary Icon SVG
+        const ioIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><circle cx="12" cy="12" r="9"/></svg>`;
+
+        // More color options, Blue is default
+        const colors = ["#007aff", "#34c759", "#ff3b30", "#af52de", "#ff9500", "#5856d6", "#00c7be", "#ff2d55", "#a2845e"];
+        
+        // Updated Config: Switch 1 default OFF is 2. All use the same IO icon.
+        let config = JSON.parse(localStorage.getItem('3s_v6')) || [
+            {id:0, name:"Pandizot", on:"1", off:"2", state:false, icon: ioIcon},
+            {id:1, name:"LED Strip", on:"3", off:"4", state:false, icon: ioIcon},
+            {id:2, name:"Sistem", on:"5", off:"6", state:false, icon: ioIcon}
         ];
 
         function openPage(id) {
@@ -201,7 +194,6 @@
                 document.getElementById('devName').innerText = device.name;
                 document.getElementById('devStatus').innerText = "Active";
                 document.getElementById('devStatus').style.color = "var(--theme)";
-                
                 openPage('dashboard');
             } catch(e) { console.log(e); }
         }
@@ -221,12 +213,12 @@
         }
 
         function save() {
-            localStorage.setItem('3s_v5', JSON.stringify(config));
+            localStorage.setItem('3s_v6', JSON.stringify(config));
             render();
         }
 
         function render() {
-            // Dashboard Grid
+            // Dashboard grid rendered with updated status text and smaller size
             document.getElementById('mainGrid').innerHTML = config.map(s => `
                 <div class="box ${s.state ? 'active' : ''}" onclick="toggle(${s.id})">
                     <div class="box-top">
@@ -235,12 +227,11 @@
                     </div>
                     <div class="box-info">
                         <div class="box-title">${s.name}</div>
-                        <div class="box-status">${s.state ? 'ACTIVE' : 'STANDBY'}</div>
+                        <div class="box-status">${s.state ? 'Açık' : 'Kapalı'}</div>
                     </div>
                 </div>
             `).join('');
 
-            // Settings Inputs
             document.getElementById('settingsList').innerHTML = config.map((s, i) => `
                 <div class="settings-group">
                     <div class="group-label">${s.name}</div>
@@ -263,17 +254,16 @@
                 </div>
             `).join('');
 
-            // Palette
             const cur = localStorage.getItem('theme') || colors[0];
             document.getElementById('themePalette').innerHTML = colors.map(c => `
                 <div class="color-dot ${c === cur ? 'selected' : ''}" style="background:${c}" onclick="applyTheme('${c}')"></div>
             `).join('');
         }
 
-        // Init
         const savedMode = localStorage.getItem('mode') || 'system';
         document.getElementById('modeSelect').value = savedMode;
         applyMode(savedMode);
+        // Default theme is now Blue (index 0)
         applyTheme(localStorage.getItem('theme') || colors[0]);
     </script>
 </body>
