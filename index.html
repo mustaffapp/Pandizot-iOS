@@ -6,59 +6,61 @@
     <title>3S Sound Pro</title>
     <style>
         :root { --theme: #007aff; --bg: #f2f2f7; --card: #ffffff; --text: #000000; --sub: #8e8e93; --border: #d1d1d6; }
-        /* Dark mode text is now explicitly white for better readability */
         [data-mode="dark"] { --bg: #000000; --card: #1c1c1e; --text: #ffffff; --sub: #98989d; --border: #333333; }
         
-        body { margin: 0; background: #111; color: var(--text); font-family: -apple-system, sans-serif; transition: 0.3s; -webkit-tap-highlight-color: transparent; display: flex; justify-content: center; min-height: 100vh; }
+        body { margin: 0; background: #111; color: var(--text); font-family: -apple-system, sans-serif; transition: 0.3s; display: flex; justify-content: center; min-height: 100vh; }
         #app { width: 100%; max-width: 440px; background: var(--bg); position: relative; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
         .page { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 100; overflow-y: auto; }
         .page.active { display: block; }
         
-        /* Header */
-        .header { padding: 40px 20px 10px; position: relative; }
-        h1 { font-size: 32px; font-weight: 800; margin: 0; color: var(--text); }
-        .top-actions { position: absolute; top: 40px; right: 20px; display: flex; flex-direction: column; gap: 10px; }
-        .action-btn { width: 42px; height: 42px; background: var(--card); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; color: var(--text); border: 1px solid var(--border); }
+        /* Dashboard Header */
+        .header { padding: 50px 24px 10px; position: relative; }
+        h1 { font-size: 34px; font-weight: 800; margin: 0; color: var(--text); letter-spacing: -0.5px; }
+        .top-actions { position: absolute; top: 50px; right: 24px; display: flex; flex-direction: column; gap: 12px; }
+        .action-btn { width: 46px; height: 46px; background: var(--card); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; color: var(--text); border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         
-        .status-pill { display: inline-flex; align-items: center; background: var(--card); color: var(--sub); padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 600; border: 1px solid var(--border); margin-top: 10px; }
+        .status-pill { display: inline-flex; align-items: center; background: var(--card); color: var(--sub); padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; border: 1px solid var(--border); margin-top: 15px; }
         .status-pill.connected { color: var(--theme); border-color: var(--theme); }
 
-        /* Grid */
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; }
-        .box { background: var(--card); border-radius: 24px; padding: 20px; aspect-ratio: 1 / 1.1; display: flex; flex-direction: column; justify-content: space-between; border: 2px solid transparent; cursor: pointer; color: var(--text); }
+        /* Dashboard Grid - Fixed Layout */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding: 24px; }
+        .box { background: var(--card); border-radius: 28px; padding: 24px; aspect-ratio: 1 / 1.1; display: flex; flex-direction: column; justify-content: space-between; border: 2.5px solid transparent; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
         .box.active { border-color: var(--theme); }
         
-        .icon-wrapper { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; background: var(--bg); color: var(--text); }
+        .box-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        .icon-wrapper { width: 52px; height: 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: var(--bg); color: var(--text); }
         .box.active .icon-wrapper { background: var(--theme); color: white; }
-        .icon-wrapper svg { width: 24px; height: 24px; fill: currentColor; }
+        .icon-wrapper svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 2.5; }
 
-        .switch { width: 44px; height: 26px; background: #3a3a3c; border-radius: 13px; position: relative; transition: 0.3s; }
-        .switch::after { content: ""; position: absolute; width: 22px; height: 22px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: 0.3s; }
+        .switch { width: 48px; height: 28px; background: #e5e5ea; border-radius: 14px; position: relative; transition: 0.3s; }
+        [data-mode="dark"] .switch { background: #3a3a3c; }
+        .switch::after { content: ""; position: absolute; width: 24px; height: 24px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         .box.active .switch { background: var(--theme); }
-        .box.active .switch::after { left: 20px; }
+        .box.active .switch::after { left: 22px; }
 
-        .box-title { font-weight: 700; font-size: 18px; }
-        .box-status { font-size: 10px; color: var(--sub); font-weight: 700; text-transform: uppercase; }
+        .box-info { display: flex; flex-direction: column; gap: 4px; }
+        .box-title { font-weight: 700; font-size: 19px; color: var(--text); }
+        .box-status { font-size: 11px; color: var(--sub); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .box.active .box-status { color: var(--theme); }
 
         /* Compact Pages */
-        .page-header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid var(--border); }
-        .header-btn { color: var(--theme); font-size: 16px; cursor: pointer; font-weight: 500; }
-        .settings-group { margin: 15px 20px; }
-        .group-label { color: var(--sub); font-size: 11px; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; }
-        .settings-card { background: var(--card); border-radius: 14px; border: 1px solid var(--border); overflow: hidden; }
-        .settings-row { display: flex; padding: 12px 16px; border-bottom: 1px solid var(--border); justify-content: space-between; align-items: center; color: var(--text); }
+        .page-header { padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 10; }
+        .header-btn { color: var(--theme); font-size: 17px; cursor: pointer; font-weight: 600; }
+        .settings-group { margin: 20px 24px; }
+        .group-label { color: var(--sub); font-size: 12px; margin-bottom: 8px; font-weight: 700; text-transform: uppercase; }
+        .settings-card { background: var(--card); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; }
+        .settings-row { display: flex; padding: 14px 18px; border-bottom: 1px solid var(--border); justify-content: space-between; align-items: center; color: var(--text); }
         
         .val-grid { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--border); }
-        .val-cell { padding: 10px 16px; border-right: 1px solid var(--border); }
-        input { background: none; border: none; color: var(--text); font-size: 15px; width: 100%; text-align: right; outline: none; }
+        .val-cell { padding: 12px 18px; border-right: 1px solid var(--border); }
+        input { background: none; border: none; color: var(--text); font-size: 16px; width: 100%; text-align: right; outline: none; font-family: inherit; }
         
-        .color-palette { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
-        .color-dot { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; }
-        .color-dot.selected { border: 2px solid var(--text); transform: scale(1.1); }
+        .color-palette { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; max-width: 60%; }
+        .color-dot { width: 26px; height: 26px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
+        .color-dot.selected { border-color: var(--text); transform: scale(1.15); }
         
-        .scan-area { padding: 40px 20px; text-align: center; color: var(--text); }
-        .main-btn { position: fixed; bottom: 30px; left: 20px; width: calc(100% - 40px); background: var(--text); color: var(--bg); padding: 15px; border-radius: 14px; font-weight: 700; text-align: center; cursor: pointer; }
+        .main-btn { position: fixed; bottom: 30px; left: 24px; width: calc(100% - 48px); background: var(--text); color: var(--bg); padding: 18px; border-radius: 18px; font-weight: 700; text-align: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
     </style>
 </head>
 <body>
@@ -86,15 +88,15 @@
                 <div class="group-label">Görünüm</div>
                 <div class="settings-card">
                     <div class="settings-row">
-                        <span>Mod</span>
-                        <select id="modeSelect" onchange="applyMode(this.value)" style="background:none; border:none; color:var(--sub); font-size:15px; outline:none;">
+                        <span>Tema Modu</span>
+                        <select id="modeSelect" onchange="applyMode(this.value)" style="background:none; border:none; color:var(--sub); font-size:16px; outline:none; text-align:right;">
                             <option value="light">Açık</option>
                             <option value="dark">Koyu</option>
                             <option value="system">Sistem</option>
                         </select>
                     </div>
-                    <div class="settings-row">
-                        <span>Tema Rengi</span>
+                    <div class="settings-row" style="align-items: flex-start;">
+                        <span>Vurgu Rengi</span>
                         <div class="color-palette" id="themePalette"></div>
                     </div>
                 </div>
@@ -107,20 +109,20 @@
                 <span style="font-weight:700">Bluetooth</span>
                 <span style="width:40px"></span>
             </div>
-            <div class="scan-area">
-                <div style="font-weight:700; font-size:16px;">Tarama Yapılıyor</div>
-                <div style="color:var(--sub); font-size:13px;">Cihazlar aranıyor...</div>
+            <div style="padding:40px 24px; text-align:center;">
+                <div style="font-weight:700; font-size:18px; color:var(--text);">Cihaz Aranıyor</div>
+                <p style="color:var(--sub); font-size:14px;">Lütfen bağlanmak istediğiniz cihazı seçin.</p>
             </div>
             <div class="settings-group">
-                <div class="group-label">Bağlı Cihaz</div>
+                <div class="group-label">Durum</div>
                 <div class="settings-card">
                     <div class="settings-row">
                         <span id="devName" style="font-weight:600">Bağlantı Yok</span>
-                        <span id="devStatus" style="color:var(--sub); font-size:12px;">--</span>
+                        <span id="devStatus" style="color:var(--sub); font-size:13px;">Pasif</span>
                     </div>
                 </div>
             </div>
-            <div id="btActionBtn" class="main-btn" onclick="connect()">Cihaza Bağlan</div>
+            <div class="main-btn" onclick="connect()">Cihaza Bağlan</div>
         </div>
     </div>
 
@@ -129,11 +131,10 @@
         const CHAR = "0000ffe1-0000-1000-8000-00805f9b34fb";
         let bleChar;
 
-        const ioIcon = `<svg viewBox="0 0 24 24"><path d="M12 3v18M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>`;
-        const colors = ["#007aff", "#34c759", "#ff3b30", "#af52de", "#ff9500", "#5856d6", "#00c7be"];
+        const ioIcon = `<svg viewBox="0 0 24 24"><path d="M12 3v18M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        const colors = ["#007aff", "#34c759", "#ff3b30", "#af52de", "#ff9500", "#5856d6", "#00c7be", "#ff2d55", "#a2845e"];
         
-        // Persistent config loading
-        let config = JSON.parse(localStorage.getItem('3s_v8')) || [
+        let config = JSON.parse(localStorage.getItem('3s_v9')) || [
             {id:0, name:"Pandizot", on:"1", off:"2", state:false, icon: ioIcon},
             {id:1, name:"LED", on:"3", off:"4", state:false, icon: ioIcon},
             {id:2, name:"Sistem", on:"5", off:"6", state:false, icon: ioIcon}
@@ -170,10 +171,9 @@
                 document.getElementById('statusPill').classList.add('connected');
                 document.getElementById('devName').innerText = device.name;
                 document.getElementById('devStatus').innerText = "Aktif";
-                
-                // Visible back button is already in header, just return to dashboard
+                document.getElementById('devStatus').style.color = "var(--theme)";
                 openPage('dashboard');
-            } catch(e) { console.log(e); }
+            } catch(e) { console.log("Bağlantı hatası:", e); }
         }
 
         async function toggle(id) {
@@ -191,7 +191,7 @@
         }
 
         function save() {
-            localStorage.setItem('3s_v8', JSON.stringify(config));
+            localStorage.setItem('3s_v9', JSON.stringify(config));
             render();
         }
 
@@ -204,12 +204,12 @@
 
             document.getElementById('settingsList').innerHTML = config.map((s, i) => `
                 <div class="settings-group">
-                    <div class="group-label">${s.name} Ayarları</div>
+                    <div class="group-label">${s.name}</div>
                     <div class="settings-card">
                         <div class="settings-row"><span>İsim</span><input type="text" value="${s.name}" oninput="updateVal(${i},'name',this.value)"></div>
                         <div class="val-grid">
-                            <div class="val-cell"><div style="font-size:9px;color:var(--sub)">AÇIK KOMUTU</div><input type="text" value="${s.on}" oninput="updateVal(${i},'on',this.value)"></div>
-                            <div class="val-cell"><div style="font-size:9px;color:var(--sub)">KAPALI KOMUTU</div><input type="text" value="${s.off}" oninput="updateVal(${i},'off',this.value)"></div>
+                            <div class="val-cell"><div style="font-size:9px;color:var(--sub)">AÇIK (ON)</div><input type="text" value="${s.on}" oninput="updateVal(${i},'on',this.value)"></div>
+                            <div class="val-cell"><div style="font-size:9px;color:var(--sub)">KAPALI (OFF)</div><input type="text" value="${s.off}" oninput="updateVal(${i},'off',this.value)"></div>
                         </div>
                     </div>
                 </div>`).join('');
@@ -219,7 +219,6 @@
                 <div class="color-dot ${c === cur ? 'selected' : ''}" style="background:${c}" onclick="applyTheme('${c}')"></div>`).join('');
         }
 
-        // Initialize from last saved settings
         const savedMode = localStorage.getItem('mode') || 'system';
         document.getElementById('modeSelect').value = savedMode;
         applyMode(savedMode);
