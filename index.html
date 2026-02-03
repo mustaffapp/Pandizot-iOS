@@ -5,86 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
     <title>3S Sound Pro</title>
     <style>
-        :root {
-            --theme: #34c759;
-            --bg: #f2f2f7;
-            --card: #ffffff;
-            --text: #000000;
-            --sub: #8e8e93;
-            --border: #e5e5ea;
-        }
-        [data-mode="dark"] {
-            --bg: #000000;
-            --card: #1c1c1e;
-            --text: #ffffff;
-            --sub: #8e8e93;
-            --border: #333333;
-        }
-
+        :root { --theme: #34c759; --bg: #f2f2f7; --card: #ffffff; --text: #000000; --sub: #8e8e93; --border: #e5e5ea; }
+        [data-mode="dark"] { --bg: #000000; --card: #1c1c1e; --text: #ffffff; --sub: #8e8e93; --border: #333333; }
         body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; transition: 0.3s; -webkit-tap-highlight-color: transparent; }
-        
         .page { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 1000; overflow-y: auto; }
         .page.active { display: block; }
-
-        /* Header & Icons */
         .header { padding: 60px 20px 10px; position: relative; }
         h1 { font-size: 34px; font-weight: 800; margin: 0; }
         .top-actions { position: absolute; top: 60px; right: 20px; display: flex; flex-direction: column; gap: 12px; }
-        .action-btn { 
-            width: 44px; height: 44px; background: var(--card); border-radius: 12px; 
-            display: flex; align-items: center; justify-content: center; font-size: 22px; 
-            cursor: pointer; color: var(--text); border: 1px solid var(--border);
-        }
-
-        /* Status Pill */
+        .action-btn { width: 44px; height: 44px; background: var(--card); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; color: var(--text); border: 1px solid var(--border); }
         .status-pill { display: inline-flex; align-items: center; background: var(--card); color: var(--sub); padding: 8px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-top: 20px; border: 1px solid var(--border); }
         .status-pill.connected { color: var(--theme); border-color: var(--theme); }
         .status-pill::before { content: "●"; margin-right: 8px; font-size: 8px; }
-
-        /* Dashboard Grid */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; }
-        .box { 
-            background: var(--card); border-radius: 24px; padding: 20px; 
-            height: 160px; display: flex; flex-direction: column; justify-content: space-between; 
-            border: 2.5px solid transparent; transition: 0.2s; cursor: pointer; box-sizing: border-box;
-        }
+        .box { background: var(--card); border-radius: 24px; padding: 20px; height: 160px; display: flex; flex-direction: column; justify-content: space-between; border: 2.5px solid transparent; transition: 0.2s; cursor: pointer; box-sizing: border-box; }
         .box.active { border-color: var(--theme); }
         .icon-wrapper { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: var(--bg); font-size: 20px; }
         .box.active .icon-wrapper { background: var(--theme); color: white; }
-
-        /* Switch */
         .switch { width: 48px; height: 26px; background: #3a3a3c; border-radius: 13px; position: relative; transition: 0.3s; }
         .switch::after { content: ""; position: absolute; width: 22px; height: 22px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: 0.3s; }
         .box.active .switch { background: var(--theme); }
         .box.active .switch::after { left: 24px; }
-
-        /* Settings Design */
         .page-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
         .settings-group { margin: 20px; }
         .group-label { color: var(--sub); font-size: 12px; margin-bottom: 8px; margin-left: 10px; font-weight: 600; text-transform: uppercase; }
         .settings-card { background: var(--card); border-radius: 18px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 20px; }
-        .settings-row { display: flex; padding: 16px; border-bottom: 0.5px solid var(--border); justify-content: space-between; align-items: center; }
-        .settings-row:last-child { border-bottom: none; }
-        .val-grid { display: grid; grid-template-columns: 1fr 1fr; border-top: 0.5px solid var(--border); }
-        .val-cell { padding: 12px 16px; border-right: 0.5px solid var(--border); }
+        .settings-row { display: flex; padding: 16px; border-bottom: 1px solid var(--border); justify-content: space-between; align-items: center; }
+        .val-grid { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--border); }
+        .val-cell { padding: 12px 16px; border-right: 1px solid var(--border); }
         .val-cell:last-child { border-right: none; }
-        .val-label { font-size: 10px; color: var(--sub); margin-bottom: 4px; font-weight: 700; }
         input { background: none; border: none; color: var(--text); font-size: 16px; width: 100%; outline: none; text-align: right; }
-
-        /* Color Palette */
         .color-palette { display: flex; gap: 8px; }
         .color-dot { width: 25px; height: 25px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
         .color-dot.selected { border-color: var(--text); transform: scale(1.1); }
-
-        /* Bluetooth Scanning */
-        .bt-scan { text-align: center; padding: 40px 20px; }
         .loader { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--theme); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .scan-btn { position: fixed; bottom: 40px; left: 20px; right: 20px; background: var(--text); color: var(--card); padding: 18px; border-radius: 16px; font-weight: 600; text-align: center; cursor: pointer; }
     </style>
 </head>
 <body>
-
     <div id="dashboard" class="page active">
         <div class="header">
             <h1>3S Sound</h1>
@@ -96,7 +55,6 @@
         </div>
         <div class="grid" id="mainGrid"></div>
     </div>
-
     <div id="settings" class="page">
         <div class="page-header">
             <span onclick="openPage('dashboard')" style="color:var(--theme); cursor:pointer;">‹ Settings</span>
@@ -108,8 +66,8 @@
             <div class="group-label">App Preferences</div>
             <div class="settings-card">
                 <div class="settings-row">
-                    <span>Mode</span>
-                    <select id="modeSelect" onchange="applyMode(this.value)" style="background:none; border:none; color:var(--sub); font-size:16px; outline:none;">
+                    <span>Dark Mode</span>
+                    <select id="modeSelect" onchange="applyMode(this.value)" style="background:none; border:none; color:var(--sub); font-size:16px;">
                         <option value="light">Light</option>
                         <option value="dark">Dark</option>
                         <option value="system">System</option>
@@ -122,125 +80,54 @@
             </div>
         </div>
     </div>
-
     <div id="bluetooth" class="page">
         <div class="page-header">
-            <span onclick="openPage('dashboard')" style="color:var(--theme); cursor:pointer;">‹ Back</span>
+            <span onclick="openPage('dashboard')" style="color:var(--theme); cursor:pointer;">‹ Close</span>
             <span style="font-weight:700">Bluetooth</span>
             <span></span>
         </div>
-        <div class="bt-scan">
-            <div class="loader"></div>
-            <div style="font-size:17px; font-weight:600">Searching for devices</div>
-            <p style="color:var(--sub); font-size:13px;">Ensure your device is in pairing mode</p>
-        </div>
+        <div style="text-align:center; padding: 40px;"><div class="loader"></div><div style="font-weight:600">Scanning...</div></div>
         <div class="settings-group">
             <div class="group-label">My Devices</div>
-            <div class="settings-card" id="btDevices">
-                <div class="settings-row"><span id="deviceName">No Device Connected</span><span style="color:var(--sub); font-size:12px;">--</span></div>
+            <div class="settings-card" id="btList">
+                <div class="settings-row"><span id="devName">No Device</span></div>
             </div>
         </div>
-        <div class="scan-btn" onclick="scanBLE()">↻ Scan Again</div>
+        <div class="scan-btn" onclick="connect()">Connect Device</div>
     </div>
-
     <script>
         const SERVICE = "0000ffe0-0000-1000-8000-00805f9b34fb";
         const CHAR = "0000ffe1-0000-1000-8000-00805f9b34fb";
         let bleChar;
-
-        let config = JSON.parse(localStorage.getItem('3s_v3_cfg')) || [
+        const colors = ["#34c759", "#007aff", "#ff3b30", "#af52de", "#ff9500", "#5856d6"];
+        let config = JSON.parse(localStorage.getItem('3s_v4')) || [
             {id:0, name:"Pandizot", on:"1", off:"1", state:false, icon:"🔊"},
             {id:1, name:"LED", on:"3", off:"4", state:false, icon:"💡"},
             {id:2, name:"Sistem", on:"5", off:"6", state:false, icon:"⚙️"}
         ];
-
-        const colors = ["#34c759", "#007aff", "#ff3b30", "#af52de", "#ff9500", "#5856d6"];
-
-        function openPage(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
-
-        function applyMode(m) {
-            localStorage.setItem('mode', m);
-            if(m === 'system') {
-                const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                document.body.setAttribute('data-mode', dark ? 'dark' : 'light');
-            } else { document.body.setAttribute('data-mode', m); }
-        }
-
-        function applyTheme(c) {
-            localStorage.setItem('theme', c);
-            document.documentElement.style.setProperty('--theme', c);
-            render();
-        }
-
-        async function scanBLE() {
-            try {
-                const device = await navigator.bluetooth.requestDevice({ filters: [{ services: [SERVICE] }] });
-                const server = await device.gatt.connect();
-                const service = await server.getPrimaryService(SERVICE);
-                bleChar = await service.getCharacteristic(CHAR);
-                document.getElementById('statusPill').innerText = "SYSTEM CONNECTED";
-                document.getElementById('statusPill').classList.add('connected');
-                document.getElementById('deviceName').innerText = device.name;
-                openPage('dashboard');
-            } catch(e) { alert("Error: " + e); }
-        }
-
-        async function toggle(id) {
-            config[id].state = !config[id].state;
-            const val = config[id].state ? config[id].on : config[id].off;
-            if(bleChar) await bleChar.writeValue(new TextEncoder().encode(val + "\n"));
-            save();
-        }
-
-        function updateVal(id, key, val) {
-            config[id][key] = val;
-            save();
-        }
-
-        function save() {
-            localStorage.setItem('3s_v3_cfg', JSON.stringify(config));
-            render();
-        }
-
+        function openPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        function applyMode(m) { localStorage.setItem('mode', m); if(m === 'system') { const d = window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.setAttribute('data-mode', d ? 'dark' : 'light'); } else { document.body.setAttribute('data-mode', m); } }
+        function applyTheme(c) { localStorage.setItem('theme', c); document.documentElement.style.setProperty('--theme', c); render(); }
+        async function connect() { try { const d = await navigator.bluetooth.requestDevice({ filters: [{ services: [SERVICE] }] }); const s = await d.gatt.connect(); const sv = await s.getPrimaryService(SERVICE); bleChar = await sv.getCharacteristic(CHAR); document.getElementById('statusPill').innerText = "SYSTEM CONNECTED"; document.getElementById('statusPill').classList.add('connected'); document.getElementById('devName').innerText = d.name; openPage('dashboard'); } catch(e) { console.log(e); } }
+        async function toggle(id) { config[id].state = !config[id].state; const v = config[id].state ? config[id].on : config[id].off; if(bleChar) await bleChar.writeValue(new TextEncoder().encode(v + "\n")); save(); }
+        function updateVal(id, key, val) { config[id][key] = val; save(); }
+        function save() { localStorage.setItem('3s_v4', JSON.stringify(config)); render(); }
         function render() {
-            // Dashboard
             document.getElementById('mainGrid').innerHTML = config.map(s => `
                 <div class="box ${s.state ? 'active' : ''}" onclick="toggle(${s.id})">
-                    <div class="box-top">
-                        <div class="icon-wrapper">${s.icon}</div>
-                        <div class="switch"></div>
-                    </div>
-                    <div>
-                        <div style="font-weight:700; font-size:19px;">${s.name}</div>
-                        <div style="font-size:11px; color:${s.state ? 'var(--theme)' : 'var(--sub)'}; font-weight:800; margin-top:4px;">${s.state ? 'ACTIVE' : 'STANDBY'}</div>
-                    </div>
-                </div>
-            `).join('');
-
-            // Settings
+                    <div class="box-top"><div class="icon-wrapper">${s.icon}</div><div class="switch"></div></div>
+                    <div><div style="font-weight:700; font-size:18px;">${s.name}</div><div style="font-size:11px; color:${s.state ? 'var(--theme)' : 'var(--sub)'}; font-weight:800; margin-top:4px;">${s.state ? 'ACTIVE' : 'STANDBY'}</div></div>
+                </div>`).join('');
             document.getElementById('settingsList').innerHTML = config.map((s, i) => `
-                <div class="settings-group">
-                    <div class="group-label">${s.name} Settings</div>
-                    <div class="settings-card">
-                        <div class="settings-row"><span>Name</span><input type="text" value="${s.name}" oninput="updateVal(${i},'name',this.value)"></div>
-                        <div class="val-grid">
-                            <div class="val-cell"><div class="val-label">ON VALUE</div><input type="text" value="${s.on}" oninput="updateVal(${i},'on',this.value)"></div>
-                            <div class="val-cell"><div class="val-label">OFF VALUE</div><input type="text" value="${s.off}" oninput="updateVal(${i},'off',this.value)"></div>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-
-            // Palette
+                <div class="settings-group"><div class="group-label">${s.name} Settings</div><div class="settings-card">
+                    <div class="settings-row"><span>Name</span><input type="text" value="${s.name}" oninput="updateVal(${i},'name',this.value)"></div>
+                    <div class="val-grid">
+                        <div class="val-cell"><div style="font-size:10px;color:var(--sub)">ON</div><input type="text" value="${s.on}" oninput="updateVal(${i},'on',this.value)"></div>
+                        <div class="val-cell"><div style="font-size:10px;color:var(--sub)">OFF</div><input type="text" value="${s.off}" oninput="updateVal(${i},'off',this.value)"></div>
+                    </div></div></div>`).join('');
             const cur = localStorage.getItem('theme') || colors[0];
-            document.getElementById('themePalette').innerHTML = colors.map(c => `
-                <div class="color-dot ${c === cur ? 'selected' : ''}" style="background:${c}" onclick="applyTheme('${c}')"></div>
-            `).join('');
+            document.getElementById('themePalette').innerHTML = colors.map(c => `<div class="color-dot ${c === cur ? 'selected' : ''}" style="background:${c}" onclick="applyTheme('${c}')"></div>`).join('');
         }
-
         applyMode(localStorage.getItem('mode') || 'system');
         applyTheme(localStorage.getItem('theme') || colors[0]);
     </script>
