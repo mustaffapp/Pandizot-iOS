@@ -163,4 +163,213 @@
             <div class="settings-card" id="otherDevicesList">
                 </div>
         </div>
-        <div class="scan-btn" onclick="startScan()">↻ Tek
+        <div class="scan-btn" onclick="startScan()">↻ Tekrar Tara</div>
+    </div>
+
+    <script>
+        const SERVICE_UUID = "0000ffe0-0000-1000-8000-00805f9b34fb";
+        const CHARACTERISTIC_UUID = "0000ffe1-0000-1000-8000-00805f9b34fb";
+        let bluetoothCharacteristic;
+        let connectedDevice = null;
+
+        // Ön tanımlı renkler
+        const themeColors = ["#007aff", "#34c759", "#ff3b30", "#af52de", "#ff9500", "#5856d6", "#000000"]; // Son eklenen siyah
+
+        let config = JSON.parse(localStorage.getItem('3s_v2_config')) || [
+            {id:0, name:"Pandizot", on:"1", off:"1", state:false, icon:"🔊"},
+            {id:1, name:"LED", on:"3", off:"4", state:false, icon:"💡"},
+            {id:2, name:"Sistem", on:"5", off:"6", state:false, icon:"⚙️"}
+        ];
+
+        // Başlangıç mod ve tema ayarları
+        let currentMode = localStorage.getItem('appMode') || 'system';
+        let currentTheme = localStorage.getItem('appTheme') || themeColors[0];
+
+        function applyTheme(color) {
+            document.documentElement.style.setProperty('--theme', color);
+            document.documentElement.style.setProperty('--pill-bg', `${color}33`); // %20 opacity
+            document.documentElement.style.setProperty('--pill-text', color);
+            localStorage.setItem('appTheme', color);
+            renderColorPalette();
+            render(); // Temayı uyguladıktan sonra arayüzü yeniden çiz
+        }
+
+        function updateMode(mode) {
+            currentMode = mode;
+            localStorage.setItem('appMode', mode);
+            if (mode === 'system') {
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.body.setAttribute('data-mode', prefersDark ? 'dark' : 'light');
+            } else {
+                document.body.setAttribute('data-mode', mode);
+            }
+        }
+
+        function renderColorPalette() {
+            const paletteContainer = document.getElementById('colorPalette');
+            paletteContainer.innerHTML = themeColors.map(color => `
+                <div class="color-swatch ${color === currentTheme ? 'selected' : ''}" 
+                     style="background-color: ${color};" 
+                     onclick="applyTheme('${color}')"></div>
+            `).join('');
+        }
+
+        function openPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if (id === 'btPage') {
+                startScan();
+            }
+        }
+
+        async function toggle(id) {
+            config[id].state = !config[id].state;
+            const command = config[id].state ? config[id].on : config[id].off;
+            
+            if (bluetoothCharacteristic) {
+                try {
+                    await bluetoothCharacteristic.writeValue(new TextEncoder().encode(command + "\n"));
+                } catch (error) {
+                    console.error("Bluetooth write error:", error);
+                    alert("Cihaza komut gönderilemedi: " + error);
+                    // Hata durumunda sviçi eski haline getir
+                    config[id].state = !config[id].state; 
+                }
+            } else {
+                alert("Bluetooth bağlı değil. Lütfen önce cihaz tarayın ve bağlanın.");
+                // Hata durumunda sviçi eski haline getir
+                config[id].state = !config[id].state;
+            }
+            saveConfig();
+        }
+
+        function updateConfig(id, key, value) {
+            config[id][key] = value;
+            saveConfig();
+        }
+
+        function saveConfig() {
+            localStorage.setItem('3s_v2_config', JSON.stringify(config));
+            render();
+        }
+
+        function render() {
+            // Dashboard Render
+            document.getElementById('mainGrid').innerHTML = config.map(s => `
+                <div class="box ${s.state ? 'active' : ''}" onclick="toggle(${s.id})">
+                    <div class="box-top">
+                        <div class="icon-wrapper" style="background:${s.state ? currentTheme : 'var(--bg)'}; color:${s.state ? 'white' : 'var(--text)'};">${s.icon}</div>
+                        <div class="switch"></div>
+                    </div>
+                    <div class="box-info">
+                        <div class="box-title">${s.name}</div>
+                        <div class="box-status">${s.state ? 'ACTIVE' : 'STANDBY'}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Settings Render
+            document.getElementById('settingsContainer').innerHTML = config.map((s, i) => `
+                <div class="settings-group">
+                    <div class="group-label">${s.name.toUpperCase()} SETTINGS</div>
+                    <div class="settings-card">
+                        <div class="settings-row">
+                            <span>Name</span>
+                            <input type="text" value="${s.name}" onchange="updateConfig(${i},'name',this.value)">
+                        </div>
+                        <div class="val-grid">
+                            <div class="val-cell">
+                                <div class="val-label">ON VALUE</div>
+                                <input type="text" value="${s.on}" onchange="updateConfig(${i},'on',this.value)">
+                            </div>
+                            <div class="val-cell">
+                                <div class="val-label">OFF VALUE</div>
+                                <input type="text" value="${s.off}" onchange="updateConfig(${i},'off',this.value)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Connection Status Pill
+            const statusPill = document.getElementById('connectionStatusPill');
+            if (connectedDevice) {
+                statusPill.textContent = "SYSTEM CONNECTED";
+                statusPill.style.borderColor = currentTheme;
+                statusPill.style.color = currentTheme;
+                statusPill.style.backgroundColor = `${currentTheme}33`; // 20% opacity
+            } else {
+                statusPill.textContent = "SYSTEM DISCONNECTED";
+                statusPill.style.borderColor = "#ff3b30"; // Kırmızı
+                statusPill.style.color = "#ff3b30";
+                statusPill.style.backgroundColor = "rgba(255, 59, 48, 0.2)";
+            }
+        }
+
+        // Bluetooth İşlevselliği
+        async function startScan() {
+            document.getElementById('myDevicesList').innerHTML = '';
+            document.getElementById('otherDevicesList').innerHTML = '';
+            document.getElementById('btScanSection').style.display = 'block';
+
+            try {
+                const device = await navigator.bluetooth.requestDevice({
+                    filters: [{ services: [SERVICE_UUID] }],
+                    optionalServices: [SERVICE_UUID]
+                });
+
+                document.getElementById('btScanSection').style.display = 'none'; // Tarama bitince loader'ı gizle
+                await connectDevice(device);
+
+            } catch (error) {
+                console.error("Bluetooth tarama veya bağlantı hatası:", error);
+                document.getElementById('btScanSection').style.display = 'none';
+                alert("Cihaz tarama veya bağlantı başarısız: " + error);
+            }
+        }
+
+        async function connectDevice(device) {
+            try {
+                const server = await device.gatt.connect();
+                const service = await server.getPrimaryService(SERVICE_UUID);
+                bluetoothCharacteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
+                connectedDevice = device;
+                updateConnectionStatus();
+
+                const myDevicesList = document.getElementById('myDevicesList');
+                myDevicesList.innerHTML = `
+                    <div class="settings-row">
+                        <span class="device-name">${device.name || "Bilinmeyen Cihaz"}</span>
+                        <span class="device-status" style="color:${currentTheme};">Connected</span>
+                    </div>
+                `;
+            } catch (error) {
+                console.error("Bluetooth bağlantı hatası:", error);
+                alert("Cihaza bağlanılamadı: " + error);
+                connectedDevice = null;
+                bluetoothCharacteristic = null;
+                updateConnectionStatus();
+            }
+        }
+
+        function updateConnectionStatus() {
+            render(); // Dashboard'daki durum çipini güncelle
+        }
+
+        // Uygulama Başlangıcı
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (currentMode === 'system') {
+                updateMode('system'); // Sistem teması değiştiğinde modu güncelle
+            }
+        });
+
+        // localStorage'dan tema ve mod ayarlarını yükle ve uygula
+        document.getElementById('modeSelect').value = currentMode;
+        updateMode(currentMode);
+        applyTheme(currentTheme); // Başlangıç temasını uygula
+        renderColorPalette(); // Renk paletini çiz
+        render(); // Arayüzü çiz
+        openPage('dashboardPage'); // Başlangıçta dashboard'u göster
+    </script>
+</body>
+</html>
