@@ -3,373 +3,181 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
-    <title>3S Sound</title>
+    <title>3S Sound Pro</title>
     <style>
-        /* Varsayılan (Açık) Tema Değerleri */
         :root {
-            --theme: #007aff;
+            --theme: #34c759;
             --bg: #f2f2f7;
             --card: #ffffff;
             --text: #000000;
             --sub: #8e8e93;
             --border: #e5e5ea;
-            --pill-bg: rgba(0, 122, 255, 0.1);
-            --pill-text: #007aff;
+            --icon-bg: #e5e5ea;
         }
-        /* Koyu Tema Değerleri */
         [data-mode="dark"] {
             --bg: #000000;
             --card: #1c1c1e;
             --text: #ffffff;
             --sub: #8e8e93;
             --border: #333333;
-            --pill-bg: rgba(0, 122, 255, 0.2);
-            --pill-text: #007aff;
+            --icon-bg: #2c2c2e;
         }
 
-        body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; transition: background 0.3s, color 0.3s; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
-
-        /* Ortak Stil */
-        .page { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 1000; overflow-y: auto; }
-        .page.active { display: block; }
-
-        /* Header */
-        .header { padding: 40px 20px 10px; position: relative; }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; transition: 0.3s; -webkit-tap-highlight-color: transparent; }
+        
+        /* Header & Icons */
+        .header { padding: 50px 20px 10px; position: relative; }
         h1 { font-size: 32px; font-weight: 800; margin: 0; }
-        .subtitle { font-size: 13px; color: var(--sub); letter-spacing: 1px; margin-top: 4px; }
-        .status-pill { display: inline-flex; align-items: center; background: var(--pill-bg); color: var(--pill-text); padding: 6px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-top: 20px; border: 1px solid var(--theme); }
-        .status-pill::before { content: "●"; margin-right: 8px; font-size: 8px; color: var(--theme); }
+        .top-actions { position: absolute; top: 50px; right: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .action-btn { 
+            width: 44px; height: 44px; background: var(--card); border-radius: 12px; 
+            display: flex; align-items: center; justify-content: center; font-size: 20px; 
+            cursor: pointer; color: var(--text); border: 1px solid var(--border);
+        }
 
-        /* Sağ Üst Butonlar */
-        .top-actions { position: absolute; top: 40px; right: 20px; display: flex; flex-direction: column; gap: 10px; }
-        .action-btn { width: 44px; height: 44px; background: var(--card); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; color: var(--text); }
-
-        /* Grid Sistemi */
+        /* Grid & Boxes */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; }
-        .box { background: var(--card); border-radius: 24px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; border: 2px solid transparent; transition: border-color 0.2s; height: 160px; box-sizing: border-box; cursor: pointer; }
+        .box { 
+            background: var(--card); border-radius: 24px; padding: 20px; 
+            height: 160px; display: flex; flex-direction: column; justify-content: space-between; 
+            border: 2px solid transparent; transition: 0.2s; cursor: pointer; box-sizing: border-box;
+        }
         .box.active { border-color: var(--theme); }
         
         .box-top { display: flex; justify-content: space-between; align-items: center; }
-        .icon-wrapper { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; background: var(--bg); color: var(--text); }
+        .icon-wrapper { 
+            width: 42px; height: 42px; border-radius: 10px; 
+            display: flex; align-items: center; justify-content: center; 
+            background: var(--icon-bg); color: var(--text); font-size: 20px;
+        }
+        .box.active .icon-wrapper { background: var(--theme); color: white; }
+
+        /* Toggle */
+        .switch { width: 48px; height: 26px; background: #3a3a3c; border-radius: 13px; position: relative; transition: 0.3s; }
+        .switch::after { content: ""; position: absolute; width: 22px; height: 22px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: 0.3s; }
+        .active .switch { background: var(--theme); }
+        .active .switch::after { left: 24px; }
+
+        /* Settings UI */
+        .page { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 1000; overflow-y: auto; }
+        .page.active { display: block; }
+        .page-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+        .settings-card { background: var(--card); border-radius: 18px; margin: 15px 20px; border: 1px solid var(--border); overflow: hidden; }
+        .settings-row { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+        .settings-row:last-child { border-bottom: none; }
         
-        /* Toggle Switch */
-        .switch { width: 48px; height: 26px; background: var(--border); border-radius: 13px; position: relative; transition: background 0.3s; }
-        .switch::after { content: ""; position: absolute; width: 22px; height: 22px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: left 0.3s; }
-        .box.active .switch { background: var(--theme); }
-        .box.active .switch::after { left: 24px; }
-
-        .box-info { margin-top: auto; }
-        .box-title { font-size: 18px; font-weight: 700; }
-        .box-status { font-size: 11px; font-weight: 800; margin-top: 4px; text-transform: uppercase; color: var(--sub); }
-        .box.active .box-status { color: var(--theme); }
-
-        /* Page Headers */
-        .page-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid var(--border); }
-        .back-link { color: var(--theme); font-size: 17px; cursor: pointer; text-decoration: none; }
-        .save-link { color: var(--theme); font-weight: 600; cursor: pointer; }
-
-        /* Ayarlar Liste Tasarımı */
-        .settings-group { margin: 20px; }
-        .group-label { color: var(--sub); font-size: 12px; margin-bottom: 8px; margin-left: 10px; text-transform: uppercase; }
-        .settings-card { background: var(--card); border-radius: 18px; overflow: hidden; border: 1px solid var(--border); }
-        .settings-row { display: flex; padding: 16px; border-bottom: 0.5px solid var(--border); justify-content: space-between; align-items: center; }
-        .val-grid { display: grid; grid-template-columns: 1fr 1fr; border-top: 0.5px solid var(--border); }
-        .val-cell { padding: 12px 16px; border-right: 0.5px solid var(--border); }
-        .val-cell:last-child { border-right: none; }
-        .val-label { font-size: 10px; color: var(--sub); margin-bottom: 4px; }
-        input[type="text"] { background: none; border: none; color: var(--text); font-size: 16px; width: 100%; outline: none; text-align: right; padding: 0; }
-        input[type="text"]::placeholder { color: var(--sub); opacity: 0.6; }
-        select { background: none; border: none; color: var(--sub); font-size: 16px; outline: none; text-align: right; }
-        option { background: var(--card); color: var(--text); }
-        .app-version { text-align:center; font-size:10px; color:var(--sub); margin-top:40px; }
-
-        /* Tema Renk Seçimi */
+        /* Theme & Mode Selectors */
         .color-palette { display: flex; gap: 8px; }
-        .color-swatch { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s; }
-        .color-swatch.selected { border-color: var(--text); transform: scale(1.1); }
-
-        /* Bluetooth Ekranı */
-        .bt-scan { text-align: center; padding-top: 40px; }
-        .loader { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--theme); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .scan-btn { position: fixed; bottom: 40px; left: 20px; right: 20px; background: white; color: black; padding: 18px; border-radius: 16px; font-weight: 600; text-align: center; cursor: pointer; }
-        /* Bluetooth liste öğeleri */
-        .device-name { font-weight: 600; }
-        .device-status { font-size: 13px; }
+        .color-dot { width: 25px; height: 25px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
+        .color-dot.selected { border-color: var(--text); transform: scale(1.1); }
+        select { background: none; border: none; color: var(--sub); font-size: 16px; outline: none; }
     </style>
 </head>
-<body data-mode="system">
+<body>
 
-    <div id="dashboardPage" class="page active">
+    <div id="dashboard" class="page active">
         <div class="header">
             <h1>3S Sound</h1>
-            <div class="subtitle">DASHBOARD</div>
-            <div class="status-pill" id="connectionStatusPill">SYSTEM CONNECTED</div>
-            
+            <div style="color:var(--theme); font-size: 12px; font-weight: 700; margin-top: 10px;">● SYSTEM CONNECTED</div>
             <div class="top-actions">
-                <div class="action-btn" onclick="openPage('settingsPage')">⚙️</div>
-                <div class="action-btn" onclick="openPage('btPage')">ᛒ</div>
+                <div class="action-btn" onclick="showPage('settings')">⚙️</div>
+                <div class="action-btn" onclick="showPage('bluetooth')">ᛒ</div>
             </div>
         </div>
         <div class="grid" id="mainGrid"></div>
     </div>
 
-    <div id="settingsPage" class="page">
+    <div id="settings" class="page">
         <div class="page-header">
-            <span class="back-link" onclick="openPage('dashboardPage')">‹ Settings</span>
-            <span style="font-weight:600">Settings</span>
-            <span class="save-link" onclick="openPage('dashboardPage')">Save</span>
+            <span onclick="showPage('dashboard')" style="color:var(--theme); cursor:pointer;">‹ Geri</span>
+            <span style="font-weight:700">Ayarlar</span>
+            <span onclick="showPage('dashboard')" style="color:var(--theme); font-weight:700; cursor:pointer;">Bitti</span>
         </div>
-        <div id="settingsContainer"></div>
+        
+        <div class="settings-card" id="configList"></div>
 
-        <div class="settings-group">
-            <div class="group-label">APP PREFERENCES</div>
-            <div class="settings-card">
-                <div class="settings-row">
-                    <span>Mod</span>
-                    <select id="modeSelect" onchange="updateMode(this.value)">
-                        <option value="light">Açık</option>
-                        <option value="dark">Koyu</option>
-                        <option value="system">Sistem</option>
-                    </select>
-                </div>
-                <div class="settings-row">
-                    <span>🎨 Tema Rengi</span>
-                    <div class="color-palette" id="colorPalette"></div>
-                </div>
+        <div style="margin-left:30px; font-size:12px; color:var(--sub);">UYGULAMA TERCİHLERİ</div>
+        <div class="settings-card">
+            <div class="settings-row">
+                <span>Mod</span>
+                <select id="modeSelect" onchange="setMode(this.value)">
+                    <option value="light">Açık</option>
+                    <option value="dark">Koyu</option>
+                    <option value="system">Sistem</option>
+                </select>
+            </div>
+            <div class="settings-row">
+                <span>Tema Rengi</span>
+                <div class="color-palette" id="themePalette"></div>
             </div>
         </div>
-        <p class="app-version">DEVICE INTERFACE V2.2.0</p>
-    </div>
-
-    <div id="btPage" class="page">
-        <div class="page-header">
-            <span class="back-link" onclick="openPage('settingsPage')">‹ Settings</span>
-            <span style="font-weight:600">Bluetooth</span>
-            <span></span>
-        </div>
-        <div id="btScanSection" class="bt-scan">
-            <div class="loader"></div>
-            <div style="font-size:17px; font-weight:600">Cihaz aranıyor</div>
-            <p style="color:var(--sub); font-size:13px;">Cihazınızın eşleştirme modunda olduğundan emin olun</p>
-        </div>
-        <div class="settings-group" id="myDevicesGroup">
-            <div class="group-label">CİHAZLARIM</div>
-            <div class="settings-card" id="myDevicesList">
-                </div>
-        </div>
-        <div class="settings-group" id="otherDevicesGroup">
-            <div class="group-label">DİĞER CİHAZLAR</div>
-            <div class="settings-card" id="otherDevicesList">
-                </div>
-        </div>
-        <div class="scan-btn" onclick="startScan()">↻ Tekrar Tara</div>
     </div>
 
     <script>
-        const SERVICE_UUID = "0000ffe0-0000-1000-8000-00805f9b34fb";
-        const CHARACTERISTIC_UUID = "0000ffe1-0000-1000-8000-00805f9b34fb";
-        let bluetoothCharacteristic;
-        let connectedDevice = null;
-
-        // Ön tanımlı renkler
-        const themeColors = ["#007aff", "#34c759", "#ff3b30", "#af52de", "#ff9500", "#5856d6", "#000000"]; // Son eklenen siyah
-
-        let config = JSON.parse(localStorage.getItem('3s_v2_config')) || [
+        const themeColors = ["#34c759", "#007aff", "#ff3b30", "#af52de", "#ff9500", "#5856d6"];
+        let config = JSON.parse(localStorage.getItem('3s_cfg')) || [
             {id:0, name:"Pandizot", on:"1", off:"1", state:false, icon:"🔊"},
             {id:1, name:"LED", on:"3", off:"4", state:false, icon:"💡"},
             {id:2, name:"Sistem", on:"5", off:"6", state:false, icon:"⚙️"}
         ];
 
-        // Başlangıç mod ve tema ayarları
-        let currentMode = localStorage.getItem('appMode') || 'system';
-        let currentTheme = localStorage.getItem('appTheme') || themeColors[0];
-
-        function applyTheme(color) {
-            document.documentElement.style.setProperty('--theme', color);
-            document.documentElement.style.setProperty('--pill-bg', `${color}33`); // %20 opacity
-            document.documentElement.style.setProperty('--pill-text', color);
-            localStorage.setItem('appTheme', color);
-            renderColorPalette();
-            render(); // Temayı uyguladıktan sonra arayüzü yeniden çiz
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
         }
 
-        function updateMode(mode) {
-            currentMode = mode;
-            localStorage.setItem('appMode', mode);
-            if (mode === 'system') {
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                document.body.setAttribute('data-mode', prefersDark ? 'dark' : 'light');
+        function setMode(mode) {
+            localStorage.setItem('3s_mode', mode);
+            if(mode === 'system') {
+                const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.body.setAttribute('data-mode', isDark ? 'dark' : 'light');
             } else {
                 document.body.setAttribute('data-mode', mode);
             }
         }
 
-        function renderColorPalette() {
-            const paletteContainer = document.getElementById('colorPalette');
-            paletteContainer.innerHTML = themeColors.map(color => `
-                <div class="color-swatch ${color === currentTheme ? 'selected' : ''}" 
-                     style="background-color: ${color};" 
-                     onclick="applyTheme('${color}')"></div>
-            `).join('');
-        }
-
-        function openPage(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            if (id === 'btPage') {
-                startScan();
-            }
-        }
-
-        async function toggle(id) {
-            config[id].state = !config[id].state;
-            const command = config[id].state ? config[id].on : config[id].off;
-            
-            if (bluetoothCharacteristic) {
-                try {
-                    await bluetoothCharacteristic.writeValue(new TextEncoder().encode(command + "\n"));
-                } catch (error) {
-                    console.error("Bluetooth write error:", error);
-                    alert("Cihaza komut gönderilemedi: " + error);
-                    // Hata durumunda sviçi eski haline getir
-                    config[id].state = !config[id].state; 
-                }
-            } else {
-                alert("Bluetooth bağlı değil. Lütfen önce cihaz tarayın ve bağlanın.");
-                // Hata durumunda sviçi eski haline getir
-                config[id].state = !config[id].state;
-            }
-            saveConfig();
-        }
-
-        function updateConfig(id, key, value) {
-            config[id][key] = value;
-            saveConfig();
-        }
-
-        function saveConfig() {
-            localStorage.setItem('3s_v2_config', JSON.stringify(config));
+        function setTheme(color) {
+            localStorage.setItem('3s_theme', color);
+            document.documentElement.style.setProperty('--theme', color);
             render();
         }
 
         function render() {
-            // Dashboard Render
-            document.getElementById('mainGrid').innerHTML = config.map(s => `
+            const grid = document.getElementById('mainGrid');
+            grid.innerHTML = config.map(s => `
                 <div class="box ${s.state ? 'active' : ''}" onclick="toggle(${s.id})">
                     <div class="box-top">
-                        <div class="icon-wrapper" style="background:${s.state ? currentTheme : 'var(--bg)'}; color:${s.state ? 'white' : 'var(--text)'};">${s.icon}</div>
+                        <div class="icon-wrapper">${s.icon}</div>
                         <div class="switch"></div>
                     </div>
-                    <div class="box-info">
-                        <div class="box-title">${s.name}</div>
-                        <div class="box-status">${s.state ? 'ACTIVE' : 'STANDBY'}</div>
-                    </div>
-                </div>
-            `).join('');
-
-            // Settings Render
-            document.getElementById('settingsContainer').innerHTML = config.map((s, i) => `
-                <div class="settings-group">
-                    <div class="group-label">${s.name.toUpperCase()} SETTINGS</div>
-                    <div class="settings-card">
-                        <div class="settings-row">
-                            <span>Name</span>
-                            <input type="text" value="${s.name}" onchange="updateConfig(${i},'name',this.value)">
-                        </div>
-                        <div class="val-grid">
-                            <div class="val-cell">
-                                <div class="val-label">ON VALUE</div>
-                                <input type="text" value="${s.on}" onchange="updateConfig(${i},'on',this.value)">
-                            </div>
-                            <div class="val-cell">
-                                <div class="val-label">OFF VALUE</div>
-                                <input type="text" value="${s.off}" onchange="updateConfig(${i},'off',this.value)">
-                            </div>
+                    <div>
+                        <div style="font-weight:700; font-size:18px;">${s.name}</div>
+                        <div style="font-size:11px; color:${s.state ? 'var(--theme)' : 'var(--sub)'}; font-weight:800; margin-top:4px;">
+                            ${s.state ? 'ACTIVE' : 'STANDBY'}
                         </div>
                     </div>
                 </div>
             `).join('');
 
-            // Connection Status Pill
-            const statusPill = document.getElementById('connectionStatusPill');
-            if (connectedDevice) {
-                statusPill.textContent = "SYSTEM CONNECTED";
-                statusPill.style.borderColor = currentTheme;
-                statusPill.style.color = currentTheme;
-                statusPill.style.backgroundColor = `${currentTheme}33`; // 20% opacity
-            } else {
-                statusPill.textContent = "SYSTEM DISCONNECTED";
-                statusPill.style.borderColor = "#ff3b30"; // Kırmızı
-                statusPill.style.color = "#ff3b30";
-                statusPill.style.backgroundColor = "rgba(255, 59, 48, 0.2)";
-            }
+            const palette = document.getElementById('themePalette');
+            const currentTheme = localStorage.getItem('3s_theme') || themeColors[0];
+            palette.innerHTML = themeColors.map(c => `
+                <div class="color-dot ${c === currentTheme ? 'selected' : ''}" 
+                     style="background:${c}" onclick="setTheme('${c}')"></div>
+            `).join('');
         }
 
-        // Bluetooth İşlevselliği
-        async function startScan() {
-            document.getElementById('myDevicesList').innerHTML = '';
-            document.getElementById('otherDevicesList').innerHTML = '';
-            document.getElementById('btScanSection').style.display = 'block';
-
-            try {
-                const device = await navigator.bluetooth.requestDevice({
-                    filters: [{ services: [SERVICE_UUID] }],
-                    optionalServices: [SERVICE_UUID]
-                });
-
-                document.getElementById('btScanSection').style.display = 'none'; // Tarama bitince loader'ı gizle
-                await connectDevice(device);
-
-            } catch (error) {
-                console.error("Bluetooth tarama veya bağlantı hatası:", error);
-                document.getElementById('btScanSection').style.display = 'none';
-                alert("Cihaz tarama veya bağlantı başarısız: " + error);
-            }
+        function toggle(id) {
+            config[id].state = !config[id].state;
+            localStorage.setItem('3s_cfg', JSON.stringify(config));
+            render();
         }
 
-        async function connectDevice(device) {
-            try {
-                const server = await device.gatt.connect();
-                const service = await server.getPrimaryService(SERVICE_UUID);
-                bluetoothCharacteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
-                connectedDevice = device;
-                updateConnectionStatus();
-
-                const myDevicesList = document.getElementById('myDevicesList');
-                myDevicesList.innerHTML = `
-                    <div class="settings-row">
-                        <span class="device-name">${device.name || "Bilinmeyen Cihaz"}</span>
-                        <span class="device-status" style="color:${currentTheme};">Connected</span>
-                    </div>
-                `;
-            } catch (error) {
-                console.error("Bluetooth bağlantı hatası:", error);
-                alert("Cihaza bağlanılamadı: " + error);
-                connectedDevice = null;
-                bluetoothCharacteristic = null;
-                updateConnectionStatus();
-            }
-        }
-
-        function updateConnectionStatus() {
-            render(); // Dashboard'daki durum çipini güncelle
-        }
-
-        // Uygulama Başlangıcı
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-            if (currentMode === 'system') {
-                updateMode('system'); // Sistem teması değiştiğinde modu güncelle
-            }
-        });
-
-        // localStorage'dan tema ve mod ayarlarını yükle ve uygula
-        document.getElementById('modeSelect').value = currentMode;
-        updateMode(currentMode);
-        applyTheme(currentTheme); // Başlangıç temasını uygula
-        renderColorPalette(); // Renk paletini çiz
-        render(); // Arayüzü çiz
-        openPage('dashboardPage'); // Başlangıçta dashboard'u göster
+        // Init
+        const savedMode = localStorage.getItem('3s_mode') || 'system';
+        document.getElementById('modeSelect').value = savedMode;
+        setMode(savedMode);
+        setTheme(localStorage.getItem('3s_theme') || themeColors[0]);
     </script>
 </body>
 </html>
