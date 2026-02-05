@@ -171,9 +171,9 @@
         let bleCharacteristic;
         
         let config = JSON.parse(localStorage.getItem('3s_config_v2')) || [
-            {id:0, name:"Pandizot", on:"1", off:"2", state:false, icon:"speaker_icon.png"},
-            {id:1, name:"LED", on:"3", off:"4", state:false, icon:"light_icon.png"},
-            {id:2, name:"Sistem", on:"5", off:"6", state:false, icon:"system_icon.png"}
+            {id:0, name:"Anahtar 1", on:"1", off:"2", state:false, icon:"speaker_icon.png", label:"Pandizot"},
+            {id:1, name:"Anahtar 2", on:"3", off:"4", state:false, icon:"light_icon.png", label:"LED"},
+            {id:2, name:"Anahtar 3", on:"5", off:"6", state:false, icon:"system_icon.png", label:"Sistem"}
         ];
 
         function openPage(id) {
@@ -207,8 +207,8 @@
                         <div class="settings-card">
                             <div class="settings-row"><span>İsim</span><input type="text" value="${s.name}" oninput="updateConfig(${i},'name',this.value)"></div>
                             <div class="val-grid">
-                                <div class="val-cell"><div style="font-size:9px;color:var(--sub)">AÇIK KOMUTU</div><input type="text" value="${s.on}" oninput="updateConfig(${i},'on',this.value)"></div>
-                                <div class="val-cell"><div style="font-size:9px;color:var(--sub)">KAPALI KOMUTU</div><input type="text" value="${s.off}" oninput="updateConfig(${i},'off',this.value)"></div>
+                                <div class="val-cell"><div style="font-size:9px;color:var(--sub)">AÇIK </div><input type="text" value="${s.on}" oninput="updateConfig(${i},'on',this.value)"></div>
+                                <div class="val-cell"><div style="font-size:9px;color:var(--sub)">KAPALI </div><input type="text" value="${s.off}" oninput="updateConfig(${i},'off',this.value)"></div>
                             </div>
                         </div>
                     </div>
@@ -305,3 +305,4 @@
     </script>
 </body>
 </html>
+
