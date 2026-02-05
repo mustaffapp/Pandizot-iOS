@@ -6,25 +6,23 @@
     <title>3S Sound Pro</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="speaker_icon.png">
+    <link rel="apple-touch-icon" href="speaker_icon.png?v=2">
     <link rel="manifest" href="manifest.json">
     
     <style>
-
         @font-face {
             font-family: 'myFont';
-            src: url('myFont.otf') format('opentype');
+            src: url('zaptron.otf') format('opentype'),
+                 url('zaptron.ttf') format('truetype');
             font-weight: normal;
             font-style: normal;
             font-display: swap; 
         }
 
         * { box-sizing: border-box; }
-
         :root { --theme: #007aff; --bg: #000000; --card: #1c1c1e; --text: #ffffff; --sub: #98989d; --border: #333333; --active-green: #34c759; }
         
         body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
-        
         #app { width: 100%; max-width: 440px; background: var(--bg); position: relative; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
 
         .page { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 100; overflow-y: auto; padding-bottom: 20px; }
@@ -32,17 +30,10 @@
         
         .header { padding: 40px 24px 20px; display: flex; justify-content: space-between; align-items: center; }
         
-        h1 { 
-            font-family: 'myFont', sans-serif; 
-            font-size: 26px; 
-            font-weight: normal; 
-            margin: 0; 
-            text-transform: uppercase;
-        }
+        h1 { font-family: 'myFont', sans-serif; font-size: 26px; font-weight: normal; margin: 0; text-transform: uppercase; }
         h1 span { color: #ff3b30; }
         
         .icon-btn { width: 47px; height: 47px; border-radius: 50%; background: var(--card); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
-        .icon-btn:active { transform: scale(0.95); background: var(--border); }
         .icon-btn img { width: 27.5px; height: 27.5px; object-fit: contain; }
 
         .status-container { padding: 0 24px 10px; }
@@ -55,7 +46,7 @@
         .box.active { border-color: var(--theme); box-shadow: 0 0 15px rgba(0, 122, 255, 0.1); }
         
         .box-top { display: flex; justify-content: space-between; align-items: center; }
-        .device-icon { width: 50px; height: 50px; object-fit: contain; opacity: 0.8; }
+        .device-icon { width: 47.5px; height: 47.5px; object-fit: contain; opacity: 0.8; }
         .box.active .device-icon { opacity: 1; filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); }
 
         .toggle-switch { position: relative; width: 50px; height: 30px; background: #3a3a3c; border-radius: 15px; transition: 0.3s; }
@@ -90,52 +81,29 @@
         .color-palette { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; max-width: 60%; }
         .color-dot { width: 26px; height: 26px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
         .color-dot.selected { border-color: var(--text); transform: scale(1.15); }
-
-        .device-list { padding: 20px 24px; }
-        .device-item { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 16px; border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--border); }
     </style>
 </head>
 <body>
     <div id="app">
         <div id="dashboard" class="page active" style="display:flex; flex-direction:column;">
             <div class="header">
-                <div class="icon-btn" onclick="openPage('settings')">
-                    <img src="settings_icon.png" alt="Settings">
-                </div>
+                <div class="icon-btn" onclick="openPage('settings')"><img src="settings_icon.png?v=2" alt="S"></div>
                 <h1><span>3S</span> Sound</h1>
-                <div class="icon-btn" onclick="openPage('bluetooth')">
-                    <img src="bluetooth_icon.png" alt="Bluetooth">
-                </div>
+                <div class="icon-btn" onclick="openPage('bluetooth')"><img src="bluetooth_icon.png?v=2" alt="B"></div>
             </div>
-            <div class="status-container">
-                <div id="mainStatus" class="status-pill">Bağlı Değil</div>
-            </div>
+            <div class="status-container"><div id="mainStatus" class="status-pill">Bağlı Değil</div></div>
             <div class="grid" id="mainGrid"></div>
-            <div class="reconnect-area">
-                <div class="main-btn secondary" onclick="reconnectLastDevice()">Tekrar Bağlan ↻</div>
-            </div>
+            <div class="reconnect-area"><div class="main-btn secondary" onclick="reconnectLastDevice()">Tekrar Bağlan ↻</div></div>
         </div>
 
         <div id="settings" class="page">
-            <div class="page-header">
-                <span class="header-btn" onclick="openPage('dashboard')">‹ Geri</span>
-                <span style="font-weight:700">Ayarlar</span>
-                <span style="width:40px"></span>
-            </div>
+            <div class="page-header"><span class="header-btn" onclick="openPage('dashboard')">‹ Geri</span><span style="font-weight:700">Ayarlar</span><span style="width:40px"></span></div>
             <div id="settingsList"></div>
             <div class="settings-group">
                 <div class="group-label">Görünüm</div>
                 <div class="settings-card">
-                    <div class="settings-row">
-                        <span>Tema Modu</span>
-                        <select id="modeSelect" onchange="applyMode(this.value)" style="background:none; border:none; color:var(--sub); font-size:16px; outline:none; text-align:right;">
-                            <option value="light">Açık</option>
-                            <option value="dark">Koyu</option>
-                            <option value="system">Sistem</option>
-                        </select>
-                    </div>
                     <div class="settings-row" style="align-items: flex-start;">
-                        <span>Vurgu Rengi</span>
+                        <span>Tema</span>
                         <div class="color-palette" id="themePalette"></div>
                     </div>
                 </div>
@@ -143,77 +111,52 @@
         </div>
 
         <div id="bluetooth" class="page">
-            <div class="page-header">
-                <span class="header-btn" onclick="openPage('dashboard')">‹ Geri</span>
-                <span style="font-weight:700">Bluetooth</span>
-                <span style="width:40px"></span>
-            </div>
-            <div style="padding:40px 24px; text-align:center; border-bottom:1px solid var(--border); background:var(--card);">
-                <div id="btPageStatus" style="font-weight:700; font-size:18px; margin-bottom:5px;">Bağlı Değil</div>
-                <div id="btPageSub" style="color:var(--sub); font-size:13px;">Bağlantı bekleniyor...</div>
-            </div>
-            <div class="device-list" id="deviceList">
-                <div class="device-item" style="justify-content:center; color:var(--sub); border:none; background:none;">Cihaz listesi hazırlanıyor...</div>
-            </div>
-            <div style="padding: 24px;">
-                <button class="main-btn" onclick="startScan()">Cihaz Ara</button>
-            </div>
+            <div class="page-header"><span class="header-btn" onclick="openPage('dashboard')">‹ Geri</span><span style="font-weight:700">Bluetooth</span><span style="width:40px"></span></div>
+            <div id="deviceList" style="padding:24px;"></div>
+            <div style="padding:24px;"><button class="main-btn" onclick="startScan()">Cihaz Ara</button></div>
         </div>
     </div>
 
     <script>
-    
         const SERVICE_UUID = "0000ffe0-0000-1000-8000-00805f9b34fb";
         const CHAR_UUID = "0000ffe1-0000-1000-8000-00805f9b34fb";
         const colors = ["#007aff", "#34c759", "#ff3b30", "#af52de", "#ff9500", "#5856d6"];
-
-        let bluetoothDevice;
         let bleCharacteristic;
         
+        const labels = ["Pandizot", "LED", "Sistem"];
         let config = JSON.parse(localStorage.getItem('3s_config_v2')) || [
-            {id:0, name:"Anahtar 1", on:"1", off:"2", state:false, icon:"speaker_icon.png", label:"Pandizot"},
-            {id:1, name:"Anahtar 2", on:"3", off:"4", state:false, icon:"light_icon.png", label:"LED"},
-            {id:2, name:"Anahtar 3", on:"5", off:"6", state:false, icon:"system_icon.png", label:"Sistem"}
+            {id:0, name:"Anahtar 1", on:"1", off:"2", state:false, icon:"speaker_icon.png?v=2"},
+            {id:1, name:"Anahtar 2", on:"3", off:"4", state:false, icon:"light_icon.png?v=2"},
+            {id:2, name:"Anahtar 3", on:"5", off:"6", state:false, icon:"system_icon.png?v=2"}
         ];
 
         function openPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            if(id === 'bluetooth') updateDeviceListUI();
         }
 
         function render() {
             const grid = document.getElementById('mainGrid');
-            if(grid) {
-                grid.innerHTML = config.map(s => `
-                    <div class="box ${s.state ? 'active' : ''}" onclick="toggleSwitch(${s.id})">
-                        <div class="box-top">
-                            <img src="${s.icon}" class="device-icon">
-                            <div class="toggle-switch"></div>
-                        </div>
-                        <div class="box-info">
-                            <div class="box-title">${s.name}</div>
-                            <div class="box-status">${s.state ? 'AÇIK' : 'KAPALI'}</div>
-                        </div>
-                    </div>
-                `).join('');
-            }
+            grid.innerHTML = config.map(s => `
+                <div class="box ${s.state ? 'active' : ''}" onclick="toggleSwitch(${s.id})">
+                    <div class="box-top"><img src="${s.icon}" class="device-icon"><div class="toggle-switch"></div></div>
+                    <div class="box-info"><div class="box-title">${s.name}</div><div class="box-status">${s.state ? 'AÇIK' : 'KAPALI'}</div></div>
+                </div>
+            `).join('');
 
             const sList = document.getElementById('settingsList');
-            if(sList) {
-                sList.innerHTML = config.map((s, i) => `
-                    <div class="settings-group">
-                        <div class="group-label">${s.name}</div>
-                        <div class="settings-card">
-                            <div class="settings-row"><span>İsim</span><input type="text" value="${s.name}" oninput="updateConfig(${i},'name',this.value)"></div>
-                            <div class="val-grid">
-                                <div class="val-cell"><div style="font-size:9px;color:var(--sub)">AÇIK </div><input type="text" value="${s.on}" oninput="updateConfig(${i},'on',this.value)"></div>
-                                <div class="val-cell"><div style="font-size:9px;color:var(--sub)">KAPALI </div><input type="text" value="${s.off}" oninput="updateConfig(${i},'off',this.value)"></div>
-                            </div>
+            sList.innerHTML = config.map((s, i) => `
+                <div class="settings-group">
+                    <div class="group-label">${labels[i]}</div>
+                    <div class="settings-card">
+                        <div class="settings-row"><span>Buton İsmi</span><input type="text" value="${s.name}" oninput="updateConfig(${i},'name',this.value)"></div>
+                        <div class="val-grid">
+                            <div class="val-cell"><div style="font-size:9px;color:var(--sub)">AÇIK KOMUTU</div><input type="text" value="${s.on}" oninput="updateConfig(${i},'on',this.value)"></div>
+                            <div class="val-cell"><div style="font-size:9px;color:var(--sub)">KAPALI KOMUTU</div><input type="text" value="${s.off}" oninput="updateConfig(${i},'off',this.value)"></div>
                         </div>
                     </div>
-                `).join('');
-            }
+                </div>
+            `).join('');
 
             const cur = localStorage.getItem('theme') || colors[0];
             const palette = document.getElementById('themePalette');
@@ -231,73 +174,25 @@
             render();
         }
 
-        function updateConfig(id, key, val) {
-            config[id][key] = val;
-            save();
-        }
-
+        function updateConfig(id, key, val) { config[id][key] = val; save(); if(key === 'name') render(); }
         function save() { localStorage.setItem('3s_config_v2', JSON.stringify(config)); }
-
-        async function startScan() {
-            try {
-                const device = await navigator.bluetooth.requestDevice({ filters: [{ services: [SERVICE_UUID] }] });
-                connectToDevice(device);
-            } catch (e) { console.log(e); }
-        }
-
-        async function reconnectLastDevice() {
-            if(navigator.bluetooth && navigator.bluetooth.getDevices) {
-                const devices = await navigator.bluetooth.getDevices();
-                if(devices.length > 0) {
-                    connectToDevice(devices[0]);
-                } else {
-                    openPage('bluetooth');
-                }
-            }
-        }
-
-        async function connectToDevice(device) {
-            try {
-                bluetoothDevice = device;
-                bluetoothDevice.addEventListener('gattserverdisconnected', onDisconnected);
-                const server = await bluetoothDevice.gatt.connect();
-                const service = await server.getPrimaryService(SERVICE_UUID);
-                bleCharacteristic = await service.getCharacteristic(CHAR_UUID);
-                updateStatusUI(true);
-                openPage('dashboard');
-            } catch (e) { updateStatusUI(false); }
-        }
-
-        function onDisconnected() { updateStatusUI(false); }
-
-        function updateStatusUI(connected) {
-            const txt = connected ? "Bağlı" : "Bağlı Değil";
-            const pill = document.getElementById('mainStatus');
-            if(pill) {
-                pill.innerText = txt;
-                connected ? pill.classList.add('connected') : pill.classList.remove('connected');
-            }
-            const btStat = document.getElementById('btPageStatus');
-            if(btStat) btStat.innerText = txt;
-        }
-
-        async function updateDeviceListUI() {
-            const list = document.getElementById('deviceList');
-            if(navigator.bluetooth && navigator.bluetooth.getDevices) {
-                const devices = await navigator.bluetooth.getDevices();
-                if(devices.length === 0) { list.innerHTML = '<div style="text-align:center;color:grey">Kayıtlı cihaz yok</div>'; return; }
-                list.innerHTML = devices.map(d => `<div class="device-item"><div>${d.name || 'İsimsiz'}</div></div>`).join('');
-            }
-        }
 
         async function toggleSwitch(id) {
             config[id].state = !config[id].state;
-            render();
-            save();
-            const val = config[id].state ? config[id].on : config[id].off;
+            render(); save();
             if(bleCharacteristic) {
-                try { await bleCharacteristic.writeValue(new TextEncoder().encode(val)); } catch(e){}
+                const val = config[id].state ? config[id].on : config[id].off;
+                await bleCharacteristic.writeValue(new TextEncoder().encode(val));
             }
+        }
+
+        async function startScan() {
+            const device = await navigator.bluetooth.requestDevice({ filters: [{ services: [SERVICE_UUID] }] });
+            const server = await device.gatt.connect();
+            const service = await server.getPrimaryService(SERVICE_UUID);
+            bleCharacteristic = await service.getCharacteristic(CHAR_UUID);
+            document.getElementById('mainStatus').innerText = "Bağlı: " + device.name;
+            openPage('dashboard');
         }
 
         applyTheme(localStorage.getItem('theme') || colors[0]);
@@ -305,4 +200,3 @@
     </script>
 </body>
 </html>
-
