@@ -4,34 +4,57 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
     <title>3S Sound Pro</title>
-<link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="speaker_icon.png">
+    <link rel="manifest" href="manifest.json">
+    
     <style>
+
+        @font-face {
+            font-family: 'myFont';
+            src: url('myFont.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap; 
+        }
+
+        * { box-sizing: border-box; }
+
         :root { --theme: #007aff; --bg: #000000; --card: #1c1c1e; --text: #ffffff; --sub: #98989d; --border: #333333; --active-green: #34c759; }
         
-        body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; display: flex; justify-content: center; min-height: 100vh; }
-        #app { width: 100%; max-width: 440px; background: var(--bg); position: relative; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
+        
+        #app { width: 100%; max-width: 440px; background: var(--bg); position: relative; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
 
-        .page { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 100; overflow-y: auto; padding-bottom: 100px; }
+        .page { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 100; overflow-y: auto; padding-bottom: 20px; }
         .page.active { display: block; }
         
-        .header { padding: 50px 24px 20px; display: flex; justify-content: space-between; align-items: center; }
-        h1 { font-size: 28px; font-weight: 800; margin: 0; }
+        .header { padding: 40px 24px 20px; display: flex; justify-content: space-between; align-items: center; }
         
-        .icon-btn { width: 64px; height: 64px; border-radius: 50%; background: var(--card); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+        h1 { 
+            font-family: 'myFont', sans-serif; 
+            font-size: 26px; 
+            font-weight: normal; 
+            margin: 0; 
+            text-transform: uppercase;
+        }
+        h1 span { color: #ff3b30; }
+        
+        .icon-btn { width: 47px; height: 47px; border-radius: 50%; background: var(--card); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
         .icon-btn:active { transform: scale(0.95); background: var(--border); }
-        .icon-btn img { width: 40px; height: 40px; object-fit: contain; } /* İkon içi büyütüldü */
+        .icon-btn img { width: 27.5px; height: 27.5px; object-fit: contain; }
 
         .status-container { padding: 0 24px 10px; }
         .status-pill { display: inline-flex; align-items: center; background: var(--card); color: var(--sub); padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 700; border: 1px solid var(--border); }
         .status-pill.connected { color: var(--theme); border-color: var(--theme); background: rgba(0, 122, 255, 0.15); }
         .status-pill::before { content: "●"; margin-right: 8px; font-size: 10px; }
 
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding: 20px 24px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding: 10px 24px; }
         .box { background: var(--card); border-radius: 28px; padding: 24px; aspect-ratio: 1 / 1.1; display: flex; flex-direction: column; justify-content: space-between; border: 2px solid transparent; cursor: pointer; transition: 0.2s; position: relative; overflow: hidden; }
         .box.active { border-color: var(--theme); box-shadow: 0 0 15px rgba(0, 122, 255, 0.1); }
         
         .box-top { display: flex; justify-content: space-between; align-items: center; }
-        
         .device-icon { width: 50px; height: 50px; object-fit: contain; opacity: 0.8; }
         .box.active .device-icon { opacity: 1; filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); }
 
@@ -44,13 +67,13 @@
         .box-info { display: flex; flex-direction: column; gap: 4px; }
         .box-title { font-weight: 700; font-size: 18px; color: var(--text); }
         .box-status { font-size: 11px; color: var(--sub); font-weight: 800; text-transform: uppercase; }
-        .box.active .box-status { color: var(--active-green); }
+        .box.active .box-status { color: var(--theme); }
 
-        .reconnect-area { padding: 20px 24px; margin-top: auto; }
+        .reconnect-area { padding: 20px 24px 30px; margin-top: auto; }
         .main-btn { width: 100%; background: var(--theme); color: white; padding: 18px; border-radius: 16px; font-weight: 700; text-align: center; cursor: pointer; font-size: 16px; box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3); }
         .main-btn.secondary { background: var(--card); border: 1px solid var(--border); color: var(--text); box-shadow: none; }
 
-        .page-header { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 10; }
+        .page-header { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 10; height: 70px; }
         .header-btn { color: var(--theme); font-size: 16px; cursor: pointer; font-weight: 600; }
         
         .settings-group { margin: 20px 24px; }
@@ -79,18 +102,15 @@
                 <div class="icon-btn" onclick="openPage('settings')">
                     <img src="settings_icon.png" alt="Settings">
                 </div>
-                <h1>3S Sound</h1>
+                <h1><span>3S</span> Sound</h1>
                 <div class="icon-btn" onclick="openPage('bluetooth')">
                     <img src="bluetooth_icon.png" alt="Bluetooth">
                 </div>
             </div>
-
             <div class="status-container">
                 <div id="mainStatus" class="status-pill">Bağlı Değil</div>
             </div>
-
             <div class="grid" id="mainGrid"></div>
-
             <div class="reconnect-area">
                 <div class="main-btn secondary" onclick="reconnectLastDevice()">Tekrar Bağlan ↻</div>
             </div>
@@ -100,11 +120,9 @@
             <div class="page-header">
                 <span class="header-btn" onclick="openPage('dashboard')">‹ Geri</span>
                 <span style="font-weight:700">Ayarlar</span>
-                <span class="header-btn" onclick="openPage('dashboard')">Bitti</span>
+                <span style="width:40px"></span>
             </div>
-            
             <div id="settingsList"></div>
-
             <div class="settings-group">
                 <div class="group-label">Görünüm</div>
                 <div class="settings-card">
@@ -130,16 +148,13 @@
                 <span style="font-weight:700">Bluetooth</span>
                 <span style="width:40px"></span>
             </div>
-            
             <div style="padding:40px 24px; text-align:center; border-bottom:1px solid var(--border); background:var(--card);">
                 <div id="btPageStatus" style="font-weight:700; font-size:18px; margin-bottom:5px;">Bağlı Değil</div>
                 <div id="btPageSub" style="color:var(--sub); font-size:13px;">Bağlantı bekleniyor...</div>
             </div>
-
             <div class="device-list" id="deviceList">
                 <div class="device-item" style="justify-content:center; color:var(--sub); border:none; background:none;">Cihaz listesi hazırlanıyor...</div>
             </div>
-
             <div style="padding: 24px;">
                 <button class="main-btn" onclick="startScan()">Cihaz Ara</button>
             </div>
@@ -147,16 +162,18 @@
     </div>
 
     <script>
+    
         const SERVICE_UUID = "0000ffe0-0000-1000-8000-00805f9b34fb";
         const CHAR_UUID = "0000ffe1-0000-1000-8000-00805f9b34fb";
         const colors = ["#007aff", "#34c759", "#ff3b30", "#af52de", "#ff9500", "#5856d6"];
 
         let bluetoothDevice;
         let bleCharacteristic;
+        
         let config = JSON.parse(localStorage.getItem('3s_config_v2')) || [
-            {id:0, name:"Pandizot", on:"1", off:"2", state:false},
-            {id:1, name:"LED", on:"3", off:"4", state:false},
-            {id:2, name:"Sistem", on:"5", off:"6", state:false}
+            {id:0, name:"Pandizot", on:"1", off:"2", state:false, icon:"speaker_icon.png"},
+            {id:1, name:"LED", on:"3", off:"4", state:false, icon:"light_icon.png"},
+            {id:2, name:"Sistem", on:"5", off:"6", state:false, icon:"system_icon.png"}
         ];
 
         function openPage(id) {
@@ -166,53 +183,51 @@
         }
 
         function render() {
-            document.getElementById('mainGrid').innerHTML = config.map(s => `
-                <div class="box ${s.state ? 'active' : ''}" onclick="toggleSwitch(${s.id})">
-                    <div class="box-top">
-                        <img src="on_off_icon.png" class="device-icon">
-                        <div class="toggle-switch"></div>
-                    </div>
-                    <div class="box-info">
-                        <div class="box-title">${s.name}</div>
-                        <div class="box-status">${s.state ? 'AÇIK' : 'KAPALI'}</div>
-                    </div>
-                </div>
-            `).join('');
-
-            document.getElementById('settingsList').innerHTML = config.map((s, i) => `
-                <div class="settings-group">
-                    <div class="group-label">${s.name}</div>
-                    <div class="settings-card">
-                        <div class="settings-row"><span>İsim</span><input type="text" value="${s.name}" oninput="updateConfig(${i},'name',this.value)"></div>
-                        <div class="val-grid">
-                            <div class="val-cell"><div style="font-size:9px;color:var(--sub)">AÇIK KOMUTU</div><input type="text" value="${s.on}" oninput="updateConfig(${i},'on',this.value)"></div>
-                            <div class="val-cell"><div style="font-size:9px;color:var(--sub)">KAPALI KOMUTU</div><input type="text" value="${s.off}" oninput="updateConfig(${i},'off',this.value)"></div>
+            const grid = document.getElementById('mainGrid');
+            if(grid) {
+                grid.innerHTML = config.map(s => `
+                    <div class="box ${s.state ? 'active' : ''}" onclick="toggleSwitch(${s.id})">
+                        <div class="box-top">
+                            <img src="${s.icon}" class="device-icon">
+                            <div class="toggle-switch"></div>
+                        </div>
+                        <div class="box-info">
+                            <div class="box-title">${s.name}</div>
+                            <div class="box-status">${s.state ? 'AÇIK' : 'KAPALI'}</div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            }
+
+            const sList = document.getElementById('settingsList');
+            if(sList) {
+                sList.innerHTML = config.map((s, i) => `
+                    <div class="settings-group">
+                        <div class="group-label">${s.name}</div>
+                        <div class="settings-card">
+                            <div class="settings-row"><span>İsim</span><input type="text" value="${s.name}" oninput="updateConfig(${i},'name',this.value)"></div>
+                            <div class="val-grid">
+                                <div class="val-cell"><div style="font-size:9px;color:var(--sub)">AÇIK KOMUTU</div><input type="text" value="${s.on}" oninput="updateConfig(${i},'on',this.value)"></div>
+                                <div class="val-cell"><div style="font-size:9px;color:var(--sub)">KAPALI KOMUTU</div><input type="text" value="${s.off}" oninput="updateConfig(${i},'off',this.value)"></div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
 
             const cur = localStorage.getItem('theme') || colors[0];
-            document.getElementById('themePalette').innerHTML = colors.map(c => `
-                <div class="color-dot ${c === cur ? 'selected' : ''}" style="background:${c}" onclick="applyTheme('${c}')"></div>
-            `).join('');
-        }
-
-        function applyMode(m) {
-            localStorage.setItem('mode', m);
-            const app = document.getElementById('app');
-            if(m === 'system') {
-                const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                app.setAttribute('data-mode', dark ? 'dark' : 'light');
-            } else {
-                
+            const palette = document.getElementById('themePalette');
+            if(palette) {
+                palette.innerHTML = colors.map(c => `
+                    <div class="color-dot ${c === cur ? 'selected' : ''}" style="background:${c}" onclick="applyTheme('${c}')"></div>
+                `).join('');
             }
         }
 
         function applyTheme(c) {
             localStorage.setItem('theme', c);
             document.documentElement.style.setProperty('--theme', c);
-            document.documentElement.style.setProperty('--active-green', c === '#ff3b30' ? '#ff3b30' : '#34c759'); 
+            document.documentElement.style.setProperty('--active-green', c === '#ff3b30' ? '#ff3b30' : '#34c759');
             render();
         }
 
@@ -220,6 +235,7 @@
             config[id][key] = val;
             save();
         }
+
         function save() { localStorage.setItem('3s_config_v2', JSON.stringify(config)); }
 
         async function startScan() {
@@ -233,14 +249,10 @@
             if(navigator.bluetooth && navigator.bluetooth.getDevices) {
                 const devices = await navigator.bluetooth.getDevices();
                 if(devices.length > 0) {
-                    document.getElementById('btPageSub').innerText = "Eski cihaz aranıyor...";
                     connectToDevice(devices[0]);
                 } else {
-                    alert("Hatırlanan cihaz bulunamadı. Lütfen 'Cihaz Ara' menüsünü kullanın.");
                     openPage('bluetooth');
                 }
-            } else {
-                alert("Tarayıcınız otomatik tekrar bağlanmayı desteklemiyor. Lütfen Bluetooth menüsünden bağlanın.");
             }
         }
 
@@ -248,38 +260,25 @@
             try {
                 bluetoothDevice = device;
                 bluetoothDevice.addEventListener('gattserverdisconnected', onDisconnected);
-                document.getElementById('btPageSub').innerText = "Bağlanıyor...";
-                
                 const server = await bluetoothDevice.gatt.connect();
                 const service = await server.getPrimaryService(SERVICE_UUID);
                 bleCharacteristic = await service.getCharacteristic(CHAR_UUID);
-                
                 updateStatusUI(true);
-                updateDeviceListUI();
-                openPage('dashboard'); 
-            } catch (e) {
-                console.log(e);
-                updateStatusUI(false);
-                alert("Bağlantı başarısız: " + e);
-            }
+                openPage('dashboard');
+            } catch (e) { updateStatusUI(false); }
         }
 
-        function onDisconnected() {
-            updateStatusUI(false);
-            updateDeviceListUI();
-        }
+        function onDisconnected() { updateStatusUI(false); }
 
         function updateStatusUI(connected) {
             const txt = connected ? "Bağlı" : "Bağlı Değil";
-            const color = connected ? "var(--theme)" : "var(--sub)";
-            
             const pill = document.getElementById('mainStatus');
-            pill.innerText = txt;
-            connected ? pill.classList.add('connected') : pill.classList.remove('connected');
-
-            document.getElementById('btPageStatus').innerText = txt;
-            document.getElementById('btPageStatus').style.color = connected ? "var(--active-green)" : "var(--sub)";
-            document.getElementById('btPageSub').innerText = connected ? bluetoothDevice.name : "Bağlantı kesildi.";
+            if(pill) {
+                pill.innerText = txt;
+                connected ? pill.classList.add('connected') : pill.classList.remove('connected');
+            }
+            const btStat = document.getElementById('btPageStatus');
+            if(btStat) btStat.innerText = txt;
         }
 
         async function updateDeviceListUI() {
@@ -287,16 +286,7 @@
             if(navigator.bluetooth && navigator.bluetooth.getDevices) {
                 const devices = await navigator.bluetooth.getDevices();
                 if(devices.length === 0) { list.innerHTML = '<div style="text-align:center;color:grey">Kayıtlı cihaz yok</div>'; return; }
-                
-                list.innerHTML = devices.map(d => `
-                    <div class="device-item">
-                        <div><div style="font-weight:700">${d.name || 'İsimsiz'}</div><div style="font-size:12px;color:grey">${d.gatt.connected ? 'Bağlı' : 'Eşleşmiş'}</div></div>
-                        ${d.gatt.connected ? '<span style="color:var(--active-green)">●</span>' : ''}
-                    </div>
-                `).join('');
-                
-                const items = list.querySelectorAll('.device-item');
-                devices.forEach((d, i) => items[i].onclick = () => connectToDevice(d));
+                list.innerHTML = devices.map(d => `<div class="device-item"><div>${d.name || 'İsimsiz'}</div></div>`).join('');
             }
         }
 
@@ -304,15 +294,12 @@
             config[id].state = !config[id].state;
             render();
             save();
-            
             const val = config[id].state ? config[id].on : config[id].off;
             if(bleCharacteristic) {
                 try { await bleCharacteristic.writeValue(new TextEncoder().encode(val)); } catch(e){}
             }
         }
 
-        const savedMode = localStorage.getItem('mode') || 'system';
-        document.getElementById('modeSelect').value = savedMode;
         applyTheme(localStorage.getItem('theme') || colors[0]);
         render();
     </script>
