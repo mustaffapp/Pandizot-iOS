@@ -54,6 +54,10 @@
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding: 10px 24px; }
         .box { background: var(--card); border-radius: 28px; padding: 24px; aspect-ratio: 1 / 0.95; display: flex; flex-direction: column; justify-content: space-between; border: 2px solid transparent; cursor: pointer; transition: 0.2s; }
         .box.active { border-color: var(--theme); }
+        
+        /* Bekleme modunda butonların görsel tepkisi */
+        .box.waiting { opacity: 0.6; cursor: not-allowed; }
+
         .box-top { display: flex; flex-direction: row; justify-content: space-between; align-items: center; }
         .device-icon { width: 60px; height: 60px; object-fit: contain; }
         .box-info { display: flex; flex-direction: column; align-items: flex-start; }
@@ -63,26 +67,22 @@
         .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 26px; height: 26px; background: white; border-radius: 50%; transition: 0.3s; }
         .box.active .toggle-switch { background: var(--theme); }
         .box.active .toggle-switch::after { transform: translateX(20px); }
-        .box.active .box-status { color: var(--theme); opacity: 1; font-weight: 600; }
-        .box.active .device-icon { filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6)); transition: filter 0.3s; }
 
         .settings-group { margin: 20px 24px; }
         .group-label { color: var(--sub); font-size: 10px; margin-bottom: 8px; font-weight: 700; text-transform: uppercase; }
         .settings-card { background: var(--card); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 12px; }
-        .settings-row { display: flex; padding: 14px 18px; border-bottom: 1px solid var(--border); justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.03); transition: background 0.2s;}
+        .settings-row { display: flex; padding: 14px 18px; border-bottom: 1px solid var(--border); justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.03); }
         
         .val-grid { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--border); background: rgba(0, 0, 0, 0.1); }
         .val-cell { padding: 12px 18px; border-right: 2px solid var(--border); }
         
-        input { background: none; border: none; color: var(--text); font-size: 16px; width: 100%; text-align: right; outline: none; padding: 2px 4px; }
+        input { background: none; border: none; color: var(--text); font-size: 16px; width: 100%; text-align: right; outline: none; }
         .color-dot { width: 26px; height: 26px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
         .color-dot.selected { border-color: var(--text); transform: scale(1.1); }
 
-        .bt-connect-btn { background: var(--theme); color: white; border: none; padding: 16px 32px; border-radius: 16px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.2s; width: 100%; }
-        .bt-connect-btn:active { transform: scale(0.95); opacity: 0.9; }
-        
+        .bt-connect-btn { background: var(--theme); color: white; border: none; padding: 16px 32px; border-radius: 16px; font-size: 16px; font-weight: 700; width: 100%; cursor: pointer; }
         .icon-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; }
-        .icon-btn img { width: 30px; height: 30px; object-fit: contain; display: block; }
+        .icon-btn img { width: 30px; height: 30px; object-fit: contain; }
     </style>
 </head>
 <body>
@@ -102,10 +102,7 @@
                 <span class="title-text">Ayarlar</span>
                 <span></span>
             </div>
-            <div class="settings-group">
-                <div class="group-label">FONKSİYON</div>
-                <div id="settingsList"></div>
-            </div>
+            <div id="settingsList" class="settings-group"></div>
             <div class="settings-group">
                 <div class="group-label">GÖRÜNÜM</div>
                 <div class="settings-card">
@@ -123,7 +120,7 @@
                 <span class="title-text">Bluetooth</span>
                 <span></span>
             </div>
-            <div style="padding:40px 24px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <div style="padding:40px 24px;">
                 <button class="bt-connect-btn" onclick="connectBluetooth()">Cihaza Bağlan</button>
                 <div id="statusText" style="margin-top:24px; color:var(--sub); font-size:14px; text-align: center;">Bağlantı Yok</div>
             </div>
@@ -132,7 +129,6 @@
 
     <script>
         const colors = ["#007aff", "#34c759", "#ff3b30", "#af52de", "#ff9500", "#5856d6"];
-        
         let config = JSON.parse(localStorage.getItem('3s_config_v2')) || [
             {id:0, name:"Pandizot", on:"1", off:"2", state:false, icon:"speaker_icon.png"},
             {id:1, name:"LED", on:"3", off:"4", state:false, icon:"light_icon.png"},
@@ -160,7 +156,6 @@
                     optionalServices: [MY_SERVICE, STD_SERVICE]
                 });
                 const server = await device.gatt.connect();
-                
                 let service, characteristic;
                 try {
                     service = await server.getPrimaryService(MY_SERVICE);
@@ -169,11 +164,10 @@
                     service = await server.getPrimaryService(STD_SERVICE);
                     characteristic = await service.getCharacteristic(STD_CHAR);
                 }
-                
                 bleCharacteristic = characteristic;
                 status.innerText = "Bağlandı: " + device.name;
                 status.style.color = "var(--theme)";
-            } catch (error) {}
+            } catch (error) { status.innerText = "Bağlantı Hatası"; }
         }
 
         async function sendBTData(data) {
@@ -181,13 +175,13 @@
             try {
                 const encoder = new TextEncoder();
                 await bleCharacteristic.writeValue(encoder.encode(data));
-            } catch (error) {}
+            } catch (error) { bleCharacteristic = null; }
         }
 
         function render() {
             const grid = document.getElementById('mainGrid');
             grid.innerHTML = config.map(s => `
-                <div class="box ${s.state ? 'active' : ''}" onclick="toggleSwitch(${s.id})">
+                <div class="box ${s.state ? 'active' : ''} ${isWaiting ? 'waiting' : ''}" onclick="toggleSwitch(${s.id})">
                     <div class="box-top">
                         <img src="${s.icon}" class="device-icon">
                         <div class="toggle-switch"></div>
@@ -200,9 +194,9 @@
             `).join('');
 
             const sList = document.getElementById('settingsList');
-            sList.innerHTML = config.map((s, i) => `
+            sList.innerHTML = `<div class="group-label">FONKSİYON</div>` + config.map((s, i) => `
                 <div class="settings-card">
-                    <div class="settings-row"><span>Anahtar</span><input type="text" value="${s.name}" oninput="updateConfig(${i},'name',this.value)"></div>
+                    <div class="settings-row"><span>${s.name}</span><input type="text" value="${s.name}" oninput="updateConfig(${i},'name',this.value)"></div>
                     <div class="val-grid">
                         <div class="val-cell"><div style="font-size:9px;color:var(--sub)">AÇIK</div><input type="text" value="${s.on}" oninput="updateConfig(${i},'on',this.value)"></div>
                         <div class="val-cell"><div style="font-size:9px;color:var(--sub)">KAPALI</div><input type="text" value="${s.off}" oninput="updateConfig(${i},'off',this.value)"></div>
@@ -215,36 +209,38 @@
             palette.innerHTML = colors.map(c => `<div class="color-dot ${c === cur ? 'selected' : ''}" style="background:${c}" onclick="applyTheme('${c}')"></div>`).join('');
         }
 
+        function updateConfig(id, key, val) { 
+            config[id][key] = val; 
+            localStorage.setItem('3s_config_v2', JSON.stringify(config)); 
+        }
+
         function applyTheme(c) {
             localStorage.setItem('theme', c);
             document.documentElement.style.setProperty('--theme', c);
             render();
         }
 
-        function updateConfig(id, key, val) { 
-            config[id][key] = val; 
-            localStorage.setItem('3s_config_v2', JSON.stringify(config)); 
-        }
-
         function toggleSwitch(id) { 
-            if (isWaiting && (id === 0 || id === 2)) return;
+            if (isWaiting) return;
+
             config[id].state = !config[id].state;
 
-            if (id === 2) {
+            if (id === 2) { 
+                isWaiting = true;
                 if (config[2].state) {
                     config[0].state = true;
                     config[1].state = true;
                     sendBTData(config[2].on);
                     setTimeout(() => sendBTData(config[0].on), 100);
-                    setTimeout(() => sendBTData(config[1].on), 200);
+                    setTimeout(() => sendBTData(config[1].on), 1700); 
                 } else {
                     config[0].state = false;
                     config[1].state = false;
-                    sendBTData(config[2].off);
-                    setTimeout(() => sendBTData(config[0].off), 100);
-                    setTimeout(() => sendBTData(config[1].off), 200);
+                    sendBTData(config[2].off); 
+                    setTimeout(() => sendBTData(config[0].off), 100); 
+                    setTimeout(() => sendBTData(config[1].off), 1700); 
                 }
-                triggerDelay();
+                setTimeout(() => { isWaiting = false; render(); }, 2000);
             } else {
                 if ((id === 0 || id === 1) && !config[id].state) {
                     config[2].state = false;
@@ -252,14 +248,13 @@
                 }
                 const code = config[id].state ? config[id].on : config[id].off;
                 sendBTData(code);
-                if (id === 0) triggerDelay();
+                
+                if (id === 0) { 
+                    isWaiting = true;
+                    setTimeout(() => { isWaiting = false; render(); }, 2000);
+                }
             }
             render(); 
-        }
-
-        function triggerDelay() {
-            isWaiting = true;
-            setTimeout(() => { isWaiting = false; }, 2000);
         }
 
         applyTheme(localStorage.getItem('theme') || colors[0]);
