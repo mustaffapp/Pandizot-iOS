@@ -37,11 +37,37 @@
             justify-content: center; 
             height: 100vh; 
             overflow: hidden; 
+            
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('note.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
         }
 
-        #app { width: 100%; max-width: 440px; background: var(--bg); position: relative; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+        #app { 
+            width: 100%; 
+            max-width: 440px; 
+            background: rgba(0, 0, 0, 0.85); 
+            position: relative; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100%; 
+            overflow: hidden; 
+        }
 
-        .page { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 100; overflow-y: auto; padding-bottom: 20px; }
+        .page { 
+            display: none; 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: transparent; 
+            z-index: 100; 
+            overflow-y: auto; 
+            padding-bottom: 20px; 
+        }
         .page.active { display: block; }
         
         .header { padding: 40px 24px 20px; display: flex; justify-content: space-between; align-items: center; height: 90px; }
@@ -55,8 +81,7 @@
         .box { background: var(--card); border-radius: 28px; padding: 24px; aspect-ratio: 1 / 0.95; display: flex; flex-direction: column; justify-content: space-between; border: 2px solid transparent; cursor: pointer; transition: 0.2s; }
         .box.active { border-color: var(--theme); }
         
-        /* Bekleme modunda butonların görsel tepkisi */
-        .box.waiting { opacity: 0.6; cursor: not-allowed; }
+        .box.locked { opacity: 0.5; cursor: not-allowed; }
 
         .box-top { display: flex; flex-direction: row; justify-content: space-between; align-items: center; }
         .device-icon { width: 60px; height: 60px; object-fit: contain; }
@@ -67,11 +92,14 @@
         .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 26px; height: 26px; background: white; border-radius: 50%; transition: 0.3s; }
         .box.active .toggle-switch { background: var(--theme); }
         .box.active .toggle-switch::after { transform: translateX(20px); }
+        .box.active .box-status { color: var(--theme); opacity: 1; font-weight: 600; }
+        
+        .box.active .device-icon { filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6)); transition: filter 0.3s; }
 
         .settings-group { margin: 20px 24px; }
         .group-label { color: var(--sub); font-size: 10px; margin-bottom: 8px; font-weight: 700; text-transform: uppercase; }
         .settings-card { background: var(--card); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 12px; }
-        .settings-row { display: flex; padding: 14px 18px; border-bottom: 1px solid var(--border); justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.03); }
+        .settings-row { display: flex; padding: 14px 18px; border-bottom: 1px solid var(--border); justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.03); transition: background 0.2s; }
         
         .val-grid { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--border); background: rgba(0, 0, 0, 0.1); }
         .val-cell { padding: 12px 18px; border-right: 2px solid var(--border); }
@@ -181,7 +209,7 @@
         function render() {
             const grid = document.getElementById('mainGrid');
             grid.innerHTML = config.map(s => `
-                <div class="box ${s.state ? 'active' : ''} ${isWaiting ? 'waiting' : ''}" onclick="toggleSwitch(${s.id})">
+                <div class="box ${s.state ? 'active' : ''} ${isWaiting ? 'locked' : ''}" onclick="toggleSwitch(${s.id})">
                     <div class="box-top">
                         <img src="${s.icon}" class="device-icon">
                         <div class="toggle-switch"></div>
@@ -227,18 +255,19 @@
 
             if (id === 2) { 
                 isWaiting = true;
+                render(); 
                 if (config[2].state) {
                     config[0].state = true;
                     config[1].state = true;
                     sendBTData(config[2].on);
                     setTimeout(() => sendBTData(config[0].on), 100);
-                    setTimeout(() => sendBTData(config[1].on), 1700); 
+                    setTimeout(() => sendBTData(config[1].on), 1700);
                 } else {
                     config[0].state = false;
                     config[1].state = false;
-                    sendBTData(config[2].off); 
-                    setTimeout(() => sendBTData(config[0].off), 100); 
-                    setTimeout(() => sendBTData(config[1].off), 1700); 
+                    sendBTData(config[2].off);
+                    setTimeout(() => sendBTData(config[0].off), 100);
+                    setTimeout(() => sendBTData(config[1].off), 1700);
                 }
                 setTimeout(() => { isWaiting = false; render(); }, 2000);
             } else {
@@ -249,8 +278,9 @@
                 const code = config[id].state ? config[id].on : config[id].off;
                 sendBTData(code);
                 
-                if (id === 0) { 
+                if (id === 0) {
                     isWaiting = true;
+                    render(); 
                     setTimeout(() => { isWaiting = false; render(); }, 2000);
                 }
             }
